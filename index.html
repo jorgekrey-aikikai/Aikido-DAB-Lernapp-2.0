@@ -1,0 +1,3579 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aikido DAB Lern-App</title>
+
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#121e30">
+    <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="icons/icon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="icons/icon-16x16.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Aikido">
+    <style>
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f5f5f5;
+            --text-primary: #333333;
+            --text-secondary: #666666;
+            --border-color: #dddddd;
+            --accent-color: #1976D2;
+            --success-color: #2E7D32;
+            --warning-color: #FF8C00;
+            --error-color: #D32F2F;
+            --gelb: #FDB813;
+            --orange: #FF8C00;
+            --gruen: #2E7D32;
+            --blau: #1976D2;
+            --braun: #5D4037;
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #2a2a2a;
+            --text-primary: #e0e0e0;
+            --text-secondary: #999999;
+            --border-color: #444444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            transition: background 0.3s, color 0.3s;
+        }
+
+        /* Navigation */
+        .nav {
+            background: var(--bg-primary);
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .nav-title {
+            font-size: 1.3em;
+            font-weight: 600;
+        }
+
+        .menu-btn {
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            cursor: pointer;
+            color: var(--text-primary);
+            padding: 5px 10px;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 10px;
+            background: var(--bg-secondary);
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: 500;
+            color: var(--text-primary);
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            background: var(--accent-color);
+            color: white;
+            border-color: var(--accent-color);
+        }
+
+        /* Container */
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 15px;
+            padding-bottom: 80px;
+        }
+
+        .screen {
+            display: none;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        /* Filter Bar */
+        .filter-bar {
+            background: var(--bg-primary);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .filter-label {
+            font-size: 0.85em;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 8px 14px;
+            border: 2px solid;
+            background: var(--bg-primary);
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.85em;
+            font-weight: 500;
+            transition: all 0.2s;
+            flex: 1;
+            min-width: 70px;
+            text-align: center;
+        }
+
+        .filter-btn.gelb { border-color: var(--gelb); color: var(--gelb); }
+        .filter-btn.orange { border-color: var(--orange); color: var(--orange); }
+        .filter-btn.gruen { border-color: var(--gruen); color: var(--gruen); }
+        .filter-btn.blau { border-color: var(--blau); color: var(--blau); }
+        .filter-btn.braun { border-color: var(--braun); color: var(--braun); }
+        .filter-btn.alle { border-color: var(--text-secondary); color: var(--text-secondary); }
+
+        .filter-btn.active {
+            background: currentColor;
+            color: white;
+        }
+
+        /* Control Bar */
+        .control-bar {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .control-btn {
+            flex: 1;
+            padding: 10px;
+            background: var(--bg-primary);
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85em;
+            font-weight: 500;
+            color: var(--text-primary);
+            transition: all 0.2s;
+        }
+
+        .control-btn:active {
+            transform: scale(0.95);
+        }
+
+        .control-btn.active {
+            background: var(--accent-color);
+            color: white;
+            border-color: var(--accent-color);
+        }
+
+        /* Flashcard */
+        .flashcard {
+            background: var(--bg-primary);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            min-height: 300px;
+            margin-bottom: 20px;
+            cursor: pointer;
+            position: relative;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+
+        .flashcard.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .flashcard-front,
+        .flashcard-back {
+            position: absolute;
+            width: 100%;
+            backface-visibility: hidden;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-height: 300px;
+        }
+
+        .flashcard-back {
+            transform: rotateY(180deg);
+        }
+
+        .flashcard-indicator {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            width: 4px;
+            height: 60px;
+            border-radius: 2px;
+        }
+
+        .flashcard-indicator.gelb { background: var(--gelb); }
+        .flashcard-indicator.orange { background: var(--orange); }
+        .flashcard-indicator.gruen { background: var(--gruen); }
+        .flashcard-indicator.blau { background: var(--blau); }
+        .flashcard-indicator.braun { background: var(--braun); }
+
+        .flashcard-content {
+            text-align: center;
+        }
+
+        .flashcard-title {
+            font-size: 1.4em;
+            font-weight: 600;
+            margin-bottom: 15px;
+            line-height: 1.3;
+        }
+
+        .flashcard-subtitle {
+            font-size: 1.1em;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+        }
+
+        .flashcard-hint {
+            font-size: 0.8em;
+            color: var(--text-secondary);
+            margin-top: 20px;
+        }
+
+        /* Videos */
+        .video-list {
+            margin-top: 20px;
+        }
+
+        .video-item {
+            margin-bottom: 10px;
+        }
+
+        .video-label {
+            font-size: 0.75em;
+            color: var(--text-secondary);
+            margin-bottom: 5px;
+        }
+
+        .video-btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: 500;
+            text-decoration: none;
+            text-align: center;
+        }
+
+        .video-btn:active {
+            background: #1565C0;
+        }
+
+        /* Notizen */
+        .note-indicator {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            font-size: 1.2em;
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .note-section {
+            margin-top: 18px;
+        }
+
+        .note-btn {
+            display: block;
+            width: 100%;
+            padding: 10px 14px;
+            background: transparent;
+            border: 1.5px dashed var(--text-secondary);
+            border-radius: 6px;
+            color: var(--text-secondary);
+            font-size: 0.85em;
+            cursor: pointer;
+            text-align: left;
+            transition: border-color 0.2s, color 0.2s;
+        }
+
+        .note-btn:active {
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+        }
+
+        .note-btn.has-note {
+            border-style: solid;
+            border-color: var(--accent-color);
+            color: var(--text-primary);
+            background: var(--bg-secondary);
+        }
+
+        .note-editor {
+            display: none;
+            margin-top: 10px;
+        }
+
+        .note-editor.open {
+            display: block;
+        }
+
+        .note-textarea {
+            width: 100%;
+            min-height: 90px;
+            padding: 10px 12px;
+            background: var(--bg-secondary);
+            border: 1.5px solid var(--accent-color);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-size: 0.9em;
+            font-family: inherit;
+            resize: vertical;
+            box-sizing: border-box;
+            outline: none;
+        }
+
+        .note-textarea::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .note-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .note-actions button {
+            flex: 1;
+            padding: 9px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.82em;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .note-save-btn {
+            background: var(--accent-color);
+            color: white;
+        }
+
+        .note-delete-btn {
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+        }
+
+        /* Rating Buttons */
+        .rating-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .rating-btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .rating-btn.success {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .rating-btn.warning {
+            background: var(--warning-color);
+            color: white;
+        }
+
+        .rating-btn.error {
+            background: var(--error-color);
+            color: white;
+        }
+
+        .rating-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Stats */
+        .stats {
+            background: var(--bg-primary);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 0.9em;
+            color: var(--text-secondary);
+        }
+
+        /* Menu Overlay */
+        .menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 200;
+            display: none;
+        }
+
+        .menu-overlay.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .menu-content {
+            background: var(--bg-primary);
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 400px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .menu-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .menu-title {
+            font-size: 1.3em;
+            font-weight: 600;
+        }
+
+        .menu-close {
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            cursor: pointer;
+            color: var(--text-primary);
+        }
+
+        .menu-section {
+            margin-bottom: 25px;
+        }
+
+        .menu-section-title {
+            font-size: 0.9em;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .menu-item {
+            padding: 12px;
+            background: var(--bg-secondary);
+            border-radius: 6px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .menu-link {
+            display: block;
+            padding: 12px;
+            background: var(--bg-secondary);
+            border-radius: 6px;
+            margin-bottom: 8px;
+            text-decoration: none;
+            color: var(--text-primary);
+        }
+
+        .toggle-switch {
+            width: 50px;
+            height: 26px;
+            background: var(--border-color);
+            border-radius: 13px;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .toggle-switch.active {
+            background: var(--accent-color);
+        }
+
+        .toggle-slider {
+            position: absolute;
+            width: 22px;
+            height: 22px;
+            background: white;
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+            transition: transform 0.3s;
+        }
+
+        .toggle-switch.active .toggle-slider {
+            transform: translateX(24px);
+        }
+
+        .disclaimer {
+            font-size: 0.85em;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            padding: 15px;
+            background: var(--bg-secondary);
+            border-radius: 6px;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+
+        .empty-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+
+        /* Admin Login */
+        .admin-login {
+            max-width: 400px;
+            margin: 100px auto;
+            padding: 30px;
+            background: var(--bg-primary);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .admin-input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 1em;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+
+        .admin-btn {
+            width: 100%;
+            padding: 12px;
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .admin-panel {
+            background: var(--bg-primary);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .upload-area {
+            border: 2px dashed var(--border-color);
+            border-radius: 8px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .upload-area:hover {
+            border-color: var(--accent-color);
+            background: var(--bg-secondary);
+        }
+
+        .upload-area.dragover {
+            border-color: var(--accent-color);
+            background: var(--bg-secondary);
+        }
+
+        @media (max-width: 600px) {
+            .filter-btn {
+                font-size: 0.8em;
+                padding: 6px 10px;
+            }
+            
+            .flashcard-title {
+                font-size: 1.2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <div class="nav">
+        <div class="nav-header">
+            <div class="nav-title">Aikido DAB</div>
+            <button class="menu-btn" onclick="toggleMenu()">☰</button>
+        </div>
+        <div class="nav-tabs">
+            <button class="tab-btn active" onclick="switchTab('techniken')">Techniken üben</button>
+            <button class="tab-btn" onclick="switchTab('angriffe')">Angriffsnamen lernen</button>
+            <button class="tab-btn" onclick="switchTab('admin')">Admin</button>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Screen: Techniken üben -->
+        <div id="screen-techniken" class="screen active">
+            <div class="filter-bar">
+                <div class="filter-label">Gürtelfarbe</div>
+                <div class="filter-buttons" id="filter-techniken"></div>
+            </div>
+
+            <div class="control-bar">
+                <button class="control-btn" id="btn-wiederholung-tech" onclick="toggleWiederholung('tech')">
+                    ⚠️ Schwachpunkte
+                </button>
+                <button class="control-btn" onclick="startExam()">
+                    📝 Prüfung
+                </button>
+            </div>
+
+            <div class="stats" id="stats-techniken"></div>
+
+            <div id="flashcard-techniken"></div>
+        </div>
+
+        <!-- Screen: Angriffsnamen lernen -->
+        <div id="screen-angriffe" class="screen">
+            <div class="filter-bar">
+                <div class="filter-label">Gürtelfarbe</div>
+                <div class="filter-buttons" id="filter-angriffe"></div>
+            </div>
+
+            <div class="control-bar">
+                <button class="control-btn" id="btn-wiederholung-ang" onclick="toggleWiederholung('ang')">
+                    ⚠️ Schwachpunkte
+                </button>
+            </div>
+
+            <div class="stats" id="stats-angriffe"></div>
+
+            <div id="flashcard-angriffe"></div>
+        </div>
+
+        <!-- Screen: Admin -->
+        <div id="screen-admin" class="screen">
+            <div id="admin-login" class="admin-login">
+                <h2 style="margin-bottom: 20px;">Admin Login</h2>
+                <input type="password" class="admin-input" id="admin-password" placeholder="Passwort">
+                <button class="admin-btn" onclick="adminLogin()">Einloggen</button>
+            </div>
+
+            <div id="admin-panel" style="display: none;">
+                <div class="admin-panel">
+                    <h3 style="margin-bottom: 15px;">Daten aktualisieren</h3>
+                    <div class="upload-area" id="upload-area" onclick="document.getElementById('file-input').click()">
+                        <div style="font-size: 2em; margin-bottom: 10px;">📁</div>
+                        <div>Excel oder CSV hier ablegen</div>
+                        <div style="font-size: 0.8em; color: var(--text-secondary); margin-top: 5px;">
+                            oder klicken zum Auswählen
+                        </div>
+                    </div>
+                    <input type="file" id="file-input" accept=".xlsx,.xls,.csv" style="display: none;" onchange="handleFileUpload(event)">
+                </div>
+
+                <div class="admin-panel">
+                    <h3 style="margin-bottom: 10px;">Statistik</h3>
+                    <div id="admin-stats"></div>
+                </div>
+
+                <button class="admin-btn" onclick="adminLogout()" style="margin-top: 15px;">
+                    Ausloggen
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Menu Overlay -->
+    <div class="menu-overlay" id="menu-overlay" onclick="closeMenuOnOverlay(event)">
+        <div class="menu-content" onclick="event.stopPropagation()">
+            <div class="menu-header">
+                <div class="menu-title">Menü</div>
+                <button class="menu-close" onclick="toggleMenu()">×</button>
+            </div>
+
+            <div class="menu-section">
+                <div class="menu-section-title">Einstellungen</div>
+                <div class="menu-item" onclick="toggleTheme()">
+                    <span>Dunkelmodus</span>
+                    <div class="toggle-switch" id="theme-toggle">
+                        <div class="toggle-slider"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="menu-section">
+                <div class="menu-section-title">Links</div>
+                <a href="https://wtv-aikido.de/" target="_blank" class="menu-link">
+                    🏠 WV-Aikido
+                </a>
+                <a href="https://aikido-bund.de" target="_blank" class="menu-link">
+                    🥋 Deutscher Aikido Bund (DAB)
+                </a>
+            </div>
+
+            <div class="menu-section">
+                <div class="menu-section-title">Disclaimer</div>
+                <div class="disclaimer">
+                    Diese App dient ausschließlich als Lernhilfe für Aikido-Techniken nach DAB-Prüfungsordnung. 
+                    Alle Angaben ohne Gewähr. Die verlinkten Videos gehören den jeweiligen Urhebern.
+                    Für die korrekte Ausführung der Techniken ist stets ein qualifizierter Trainer erforderlich.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Globale Variablen
+        let techniques = [];
+        let attacks = [];
+        let currentTab = 'techniken';
+        let currentFilter = { tech: 'alle', ang: 'alle' };
+        let showDueOnly = { tech: false, ang: false };
+        let currentCardIndex = { tech: 0, ang: 0 };
+        let cardFlipped = { tech: false, ang: false };
+        let examMode = false;
+        let examResults = [];
+        
+        // Admin
+        const ADMIN_PASSWORD = 'Iotka2711';
+        let adminLoggedIn = false;
+
+        // Spaced Repetition Data
+        let spacedRepData = {
+            tech: {},
+            ang: {}
+        };
+
+        let notes = {}; // { "tech-1": "Notiz...", "ang-3": "Notiz..." }
+
+        // localStorage
+        function loadFromStorage() {
+            const saved = localStorage.getItem('aikidoData');
+            if (saved) {
+                const data = JSON.parse(saved);
+                techniques = data.techniques || [];
+                attacks = data.attacks || [];
+            }
+            
+            const srSaved = localStorage.getItem('aikidoSpacedRep');
+            if (srSaved) {
+                spacedRepData = JSON.parse(srSaved);
+            }
+
+            const notesSaved = localStorage.getItem('aikidoNotes');
+            if (notesSaved) {
+                notes = JSON.parse(notesSaved);
+            }
+
+            const theme = localStorage.getItem('aikidoTheme');
+            if (theme === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                document.getElementById('theme-toggle').classList.add('active');
+            }
+        }
+
+        function saveToStorage() {
+            localStorage.setItem('aikidoData', JSON.stringify({
+                techniques,
+                attacks
+            }));
+            localStorage.setItem('aikidoSpacedRep', JSON.stringify(spacedRepData));
+            localStorage.setItem('aikidoNotes', JSON.stringify(notes));
+        }
+
+        // Farben Mapping
+        const colorMap = {
+            'Gelb (5. Kyu)': 'gelb',
+            'Orange (4. Kyu)': 'orange',
+            'Grün (3. Kyu)': 'gruen',
+            'Blau (2. Kyu)': 'blau',
+            'Braun (1. Kyu)': 'braun'
+        };
+
+        // Init
+        function init() {
+            loadFromStorage();
+            
+            // Migration: alte Daten (videos als Array) durch neue ersetzen
+            const needsMigration = techniques.length > 0 && techniques.some(t => Array.isArray(t.videos));
+            
+            if (techniques.length === 0 || needsMigration) {
+                loadSampleData();
+            }
+            
+            createFilterButtons();
+            renderCurrentScreen();
+        }
+
+        // Eingebettete Daten
+        function loadSampleData() {
+            const data = {
+                "techniques": [
+                                {
+                                                "id": 1,
+                                                "technik": "Shiho Nage",
+                                                "variation": "IRIMI",
+                                                "angriffJap": "Katate Tori - Aihanme",
+                                                "angriffDe": "Griff eines Handgelenks -schräg",
+                                                "farbe": "Gelb (5. Kyu)",
+                                                "videos": {
+                                                                "François Pichereau": "https://youtu.be/RVgNC05JxSQ"
+                                                }
+                                },
+                                {
+                                                "id": 2,
+                                                "technik": "Shiho Nage",
+                                                "variation": "IRIMI",
+                                                "angriffJap": "Katate Tori - Gyakuhanme",
+                                                "angriffDe": "Griff eines Handgelenks - spiegelgleich",
+                                                "farbe": "Gelb (5. Kyu)",
+                                                "videos": {
+                                                                "Ruben Karl (Aikikai)": "https://youtu.be/11lFn4wpfsk?si=RiLeV0N7pSdlDv4S&t=432",
+                                                                "Howcast": "https://youtu.be/T9vWR7EdQdM?si=JWHUn_kXKLeYt_Ks&t=22",
+                                                                "François Pichereau": "https://youtu.be/jOCU-sgBVWo"
+                                                }
+                                },
+                                {
+                                                "id": 3,
+                                                "technik": "Shiho Nage",
+                                                "variation": "IRIMI",
+                                                "angriffJap": "Ryote-Tori",
+                                                "angriffDe": "Griff beider Handgelenke",
+                                                "farbe": "Gelb (5. Kyu)",
+                                                "videos": {
+                                                                "Ruben Karl (Aikikai)": "https://youtu.be/LaSilceurNY?si=8hMMYbdQ5L2idnT7&t=847",
+                                                                "François Pichereau": "https://youtu.be/K6vZ7ok8AKg"
+                                                }
+                                },
+                                {
+                                                "id": 4,
+                                                "technik": "Shiho Nage",
+                                                "variation": "IRIMI",
+                                                "angriffJap": "Katate-ryote-tori",
+                                                "angriffDe": "Zwei Hände fassen ein Handgelenk",
+                                                "farbe": "Gelb (5. Kyu)",
+                                                "videos": {
+                                                                "Ruben Karl (Aikikai)": "https://youtu.be/u8WD-0W-pP4?si=JvLKB9cyUN4BjbB1&t=870",
+                                                                "François Pichereau": "https://www.youtube.com/watch?v=vFNRD-_YEYo"
+                                                }
+                                },
+                                {
+                                                "id": 5,
+                                                "technik": "Shiho Nage",
+                                                "variation": "IRIMI",
+                                                "angriffJap": "Mune-tori",
+                                                "angriffDe": "Griff zum Revers",
+                                                "farbe": "Gelb (5. Kyu)",
+                                                "videos": {
+                                                                "Ruben Karl (Aikikai)": "https://youtu.be/bi8t_-kLil8?si=DHSnqIHQM3GX4V0R&t=1896",
+                                                                "François Pichereau": "https://youtu.be/RZnxmCDsKTk"
+                                                }
+                                },
+                                {
+                                                "id": 6,
+                                                "technik": "Shiho Nage",
+                                                "variation": "TENKAN",
+                                                "angriffJap": "Katate Tori - Aihanme",
+                                                "angriffDe": "Griff eines Handgelenks -schräg",
+                                                "farbe": "Gelb (5. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 7,
+                                                "technik": "Shiho Nage",
+                                                "variation": "TENKAN",
+                                                "angriffJap": "Katate Tori - Gyakuhanme",
+                                                "angriffDe": "Griff eines Handgelenks - spiegelgleich",
+                                                "farbe": "Gelb (5. Kyu)",
+                                                "videos": {
+                                                                "Ruben Karl (Aikikai)": "https://youtu.be/11lFn4wpfsk?si=P-Ic8r4e8D0S66EF&t=454"
+                                                }
+                                },
+                                {
+                                                "id": 8,
+                                                "technik": "Shiho Nage",
+                                                "variation": "TENKAN",
+                                                "angriffJap": "Ryote-Tori",
+                                                "angriffDe": "Griff beider Handgelenke",
+                                                "farbe": "Gelb (5. Kyu)",
+                                                "videos": {
+                                                                "Ruben Karl (Aikikai)": "https://youtu.be/LaSilceurNY?si=gaNl3j18MisYQRhg&t=869"
+                                                }
+                                },
+                                {
+                                                "id": 9,
+                                                "technik": "Shiho Nage",
+                                                "variation": "TENKAN",
+                                                "angriffJap": "Katate-ryote-tori",
+                                                "angriffDe": "Zwei Hände fassen ein Handgelenk",
+                                                "farbe": "Gelb (5. Kyu)",
+                                                "videos": {
+                                                                "Ruben Karl (Aikikai)": "https://youtu.be/u8WD-0W-pP4?si=eTWBuXCnzeljO1di&t=893"
+                                                }
+                                },
+                                {
+                                                "id": 10,
+                                                "technik": "Shiho Nage",
+                                                "variation": "TENKAN",
+                                                "angriffJap": "Mune-tori",
+                                                "angriffDe": "Griff zum Revers",
+                                                "farbe": "Gelb (5. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 11,
+                                                "technik": "Ude-osae (Ikkyo)",
+                                                "variation": "IRIMI",
+                                                "angriffJap": "Katate Tori - Aihanme",
+                                                "angriffDe": "Griff eines Handgelenks -schräg",
+                                                "farbe": "Gelb (5. Kyu)",
+                                                "videos": {
+                                                                "Howcast": "https://youtu.be/SVdY3AwlH_w?si=s1CgOBf1S0QqLFlb&t=13"
+                                                }
+                                },
+                                {
+                                                "id": 12,
+                                                "technik": "Ude-osae (Ikkyo)",
+                                                "variation": "IRIMI",
+                                                "angriffJap": "Katate Tori - Gyakuhanme",
+                                                "angriffDe": "Griff eines Handgelenks - spiegelgleich",
+                                                "farbe": "Gelb (5. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 13,
+                                                "technik": "Ude-osae (Ikkyo)",
+                                                "variation": "IRIMI",
+                                                "angriffJap": "Ryote-Tori",
+                                                "angriffDe": "Griff beider Handgelenke",
+                                                "farbe": "Gelb (5. Kyu)",
+                                                "videos": {
+                                                                "Ruben Karl (Aikikai)": "https://youtu.be/LaSilceurNY?si=qw3t7t54DHED6P-3&t=630"
+                                                }
+                                },
+                                {
+                                                "id": 14,
+                                                "technik": "Ude-osae (Ikkyo)",
+                                                "variation": "IRIMI",
+                                                "angriffJap": "Katate-ryote-tori",
+                                                "angriffDe": "Zwei Hände fassen ein Handgelenk",
+                                                "farbe": "Gelb (5. Kyu)",
+                                                "videos": {
+                                                                "Ruben Karl (Aikikai)": "https://youtu.be/bi8t_-kLil8?si=u3kJKb3dPeI2VdtV&t=1448"
+                                                }
+                                },
+                                {
+                                                "id": 15,
+                                                "technik": "Ude-osae (Ikkyo)",
+                                                "variation": "IRIMI",
+                                                "angriffJap": "Mune-tori",
+                                                "angriffDe": "Griff zum Revers",
+                                                "farbe": "Gelb (5. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 16,
+                                                "technik": "Ude-osae (Ikkyo)",
+                                                "variation": "TENKAN",
+                                                "angriffJap": "Katate Tori - Aihanme",
+                                                "angriffDe": "Griff eines Handgelenks -schräg",
+                                                "farbe": "Gelb (5. Kyu)",
+                                                "videos": {
+                                                                "Howcast": "https://youtu.be/SVdY3AwlH_w?si=hP82eJosITt3F7or&t=67"
+                                                }
+                                },
+                                {
+                                                "id": 17,
+                                                "technik": "Ude-osae (Ikkyo)",
+                                                "variation": "TENKAN",
+                                                "angriffJap": "Katate Tori - Gyakuhanme",
+                                                "angriffDe": "Griff eines Handgelenks - spiegelgleich",
+                                                "farbe": "Gelb (5. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 18,
+                                                "technik": "Ude-osae (Ikkyo)",
+                                                "variation": "TENKAN",
+                                                "angriffJap": "Ryote-Tori",
+                                                "angriffDe": "Griff beider Handgelenke",
+                                                "farbe": "Gelb (5. Kyu)",
+                                                "videos": {
+                                                                "Ruben Karl (Aikikai)": "https://youtu.be/LaSilceurNY?si=opC7vNTlURQXU8qB&t=661"
+                                                }
+                                },
+                                {
+                                                "id": 19,
+                                                "technik": "Ude-osae (Ikkyo)",
+                                                "variation": "TENKAN",
+                                                "angriffJap": "Katate-ryote-tori",
+                                                "angriffDe": "Zwei Hände fassen ein Handgelenk",
+                                                "farbe": "Gelb (5. Kyu)",
+                                                "videos": {
+                                                                "Ruben Karl (Aikikai)": "https://youtu.be/bi8t_-kLil8?si=25ccdid_zV3D6T86&t=1487"
+                                                }
+                                },
+                                {
+                                                "id": 20,
+                                                "technik": "Ude-osae (Ikkyo)",
+                                                "variation": "TENKAN",
+                                                "angriffJap": "Mune-tori",
+                                                "angriffDe": "Griff zum Revers",
+                                                "farbe": "Gelb (5. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 21,
+                                                "technik": "Shiho Nage",
+                                                "variation": "IRIMI",
+                                                "angriffJap": "Ushiro-ryote-tori",
+                                                "angriffDe": "Griff beider Handgelenke von hinten",
+                                                "farbe": "Orange (4. Kyu)",
+                                                "videos": {
+                                                                "Ruben Karl (Aikikai)": "https://youtu.be/u8WD-0W-pP4?si=SMjfYEungVHqiKFn&t=2053"
+                                                }
+                                },
+                                {
+                                                "id": 22,
+                                                "technik": "Shiho Nage",
+                                                "variation": "IRIMI",
+                                                "angriffJap": "Yokomen-Uchi",
+                                                "angriffDe": "Schräger Schlag zum Hals",
+                                                "farbe": "Orange (4. Kyu)",
+                                                "videos": {
+                                                                "Ruben Karl (Aikikai)": "https://youtu.be/bi8t_-kLil8?si=kEwT47mY6-DrQWIA&t=2267",
+                                                                "François Pichereau": "https://youtu.be/8_zv1Uk4uXM"
+                                                }
+                                },
+                                {
+                                                "id": 23,
+                                                "technik": "Shiho Nage",
+                                                "variation": "TENKAN",
+                                                "angriffJap": "Ushiro-ryote-tori",
+                                                "angriffDe": "Griff beider Handgelenke von hinten",
+                                                "farbe": "Orange (4. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 24,
+                                                "technik": "Shiho Nage",
+                                                "variation": "TENKAN",
+                                                "angriffJap": "Yokomen-Uchi",
+                                                "angriffDe": "Schräger Schlag zum Hals",
+                                                "farbe": "Orange (4. Kyu)",
+                                                "videos": {
+                                                                "Ruben Karl (Aikikai)": "https://youtu.be/bi8t_-kLil8?si=8rmUUwEUyVfPiNvy&t=2288",
+                                                                "Deutscher Aikido Bund": "http://www.deutscher-aikido-bund.de/filme/techniken/shiho-nage_yokomen-uchi/shiho-nage_yokomen-uchi_640.mp4"
+                                                }
+                                },
+                                {
+                                                "id": 25,
+                                                "technik": "Ude-osae (Ikkyo)",
+                                                "variation": "IRIMI",
+                                                "angriffJap": "Ushiro-ryokata-tori",
+                                                "angriffDe": "Griff beider Schultern von hinten",
+                                                "farbe": "Orange (4. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 26,
+                                                "technik": "Ude-osae (Ikkyo)",
+                                                "variation": "IRIMI",
+                                                "angriffJap": "Ushiro-ryote-tori",
+                                                "angriffDe": "Griff beider Handgelenke von hinten",
+                                                "farbe": "Orange (4. Kyu)",
+                                                "videos": {
+                                                                "Ruben Karl (Aikikai)": "https://youtu.be/bi8t_-kLil8?si=p5AhrQohchdhNPrN&t=2350"
+                                                }
+                                },
+                                {
+                                                "id": 27,
+                                                "technik": "Ude-osae (Ikkyo)",
+                                                "variation": "IRIMI",
+                                                "angriffJap": "Ushiro-eri-tori",
+                                                "angriffDe": "Griff von hinten in den Kragen",
+                                                "farbe": "Orange (4. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 28,
+                                                "technik": "Ude-osae (Ikkyo)",
+                                                "variation": "IRIMI",
+                                                "angriffJap": "Ushiro-katate-tori-kubi-shime",
+                                                "angriffDe": "Griff eines Handgelenks und würgen von hinten",
+                                                "farbe": "Orange (4. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 29,
+                                                "technik": "Ude-osae (Ikkyo)",
+                                                "variation": "IRIMI",
+                                                "angriffJap": "Yokomen-Uchi",
+                                                "angriffDe": "Schräger Schlag zum Hals",
+                                                "farbe": "Orange (4. Kyu)",
+                                                "videos": {
+                                                                "Ruben Karl (Aikikai)": "https://youtu.be/u8WD-0W-pP4?si=K5TqMIApJxaGmiYx&t=1385"
+                                                }
+                                },
+                                {
+                                                "id": 30,
+                                                "technik": "Ude-osae (Ikkyo)",
+                                                "variation": "IRIMI",
+                                                "angriffJap": "Shomen-uchi",
+                                                "angriffDe": "Gerader Schlag zum Kopf",
+                                                "farbe": "Orange (4. Kyu)",
+                                                "videos": {
+                                                                "Ruben Karl (Aikikai)": "https://youtu.be/bi8t_-kLil8?si=J4j83NmJ2sM4Can6&t=1922"
+                                                }
+                                },
+                                {
+                                                "id": 31,
+                                                "technik": "Ude-osae (Ikkyo)",
+                                                "variation": "IRIMI",
+                                                "angriffJap": "Shomen-tsuki",
+                                                "angriffDe": "Gerader Fauststoß",
+                                                "farbe": "Orange (4. Kyu)",
+                                                "videos": {
+                                                                "Ruben Karl (Aikikai)": "https://youtu.be/u8WD-0W-pP4?si=n6UBFiGhw-AHxM3D&t=1761"
+                                                }
+                                },
+                                {
+                                                "id": 32,
+                                                "technik": "Ude-osae (Ikkyo)",
+                                                "variation": "TENKAN",
+                                                "angriffJap": "Ushiro-ryokata-tori",
+                                                "angriffDe": "Griff beider Schultern von hinten",
+                                                "farbe": "Orange (4. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 33,
+                                                "technik": "Ude-osae (Ikkyo)",
+                                                "variation": "TENKAN",
+                                                "angriffJap": "Ushiro-ryote-tori",
+                                                "angriffDe": "Griff beider Handgelenke von hinten",
+                                                "farbe": "Orange (4. Kyu)",
+                                                "videos": {
+                                                                "Ruben Karl (Aikikai)": "https://youtu.be/bi8t_-kLil8?si=n99Palv-_dk_JO3P&t=2391"
+                                                }
+                                },
+                                {
+                                                "id": 34,
+                                                "technik": "Ude-osae (Ikkyo)",
+                                                "variation": "TENKAN",
+                                                "angriffJap": "Ushiro-eri-tori",
+                                                "angriffDe": "Griff von hinten in den Kragen",
+                                                "farbe": "Orange (4. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 35,
+                                                "technik": "Ude-osae (Ikkyo)",
+                                                "variation": "TENKAN",
+                                                "angriffJap": "Ushiro-katate-tori-kubi-shime",
+                                                "angriffDe": "Griff eines Handgelenks und würgen von hinten",
+                                                "farbe": "Orange (4. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 36,
+                                                "technik": "Ude-osae (Ikkyo)",
+                                                "variation": "TENKAN",
+                                                "angriffJap": "Yokomen-Uchi",
+                                                "angriffDe": "Schräger Schlag zum Hals",
+                                                "farbe": "Orange (4. Kyu)",
+                                                "videos": {
+                                                                "Ruben Karl (Aikikai)": "https://youtu.be/u8WD-0W-pP4?si=yf57m5cHoAPZrm8Q&t=1413"
+                                                }
+                                },
+                                {
+                                                "id": 37,
+                                                "technik": "Ude-osae (Ikkyo)",
+                                                "variation": "TENKAN",
+                                                "angriffJap": "Shomen-uchi",
+                                                "angriffDe": "Gerader Schlag zum Kopf",
+                                                "farbe": "Orange (4. Kyu)",
+                                                "videos": {
+                                                                "Ruben Karl (Aikikai)": "https://youtu.be/bi8t_-kLil8?si=OLQsyo_Fk-bMhExQ&t=1955"
+                                                }
+                                },
+                                {
+                                                "id": 38,
+                                                "technik": "Ude-osae (Ikkyo)",
+                                                "variation": "TENKAN",
+                                                "angriffJap": "Shomen-tsuki",
+                                                "angriffDe": "Gerader Fauststoß",
+                                                "farbe": "Orange (4. Kyu)",
+                                                "videos": {
+                                                                "Ruben Karl (Aikikai)": "https://youtu.be/u8WD-0W-pP4?si=4I_cXNIsvrLTOZA8&t=1789"
+                                                }
+                                },
+                                {
+                                                "id": 39,
+                                                "technik": "Kaiten-Nage Uchi",
+                                                "variation": "IRIMI",
+                                                "angriffJap": "Yokomen-Uchi",
+                                                "angriffDe": "Schräger Schlag zum Hals",
+                                                "farbe": "Orange (4. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 40,
+                                                "technik": "Kaiten-Nage Uchi",
+                                                "variation": "IRIMI",
+                                                "angriffJap": "Shomen-uchi",
+                                                "angriffDe": "Gerader Schlag zum Kopf",
+                                                "farbe": "Orange (4. Kyu)",
+                                                "videos": {
+                                                                "Ruben Karl (Aikikai)": "https://youtu.be/u8WD-0W-pP4?si=-CkvTbWZ7eN45_fM&t=1041"
+                                                }
+                                },
+                                {
+                                                "id": 41,
+                                                "technik": "Kaiten-Nage Uchi",
+                                                "variation": "IRIMI",
+                                                "angriffJap": "Shomen-tsuki",
+                                                "angriffDe": "Gerader Fauststoß",
+                                                "farbe": "Orange (4. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 42,
+                                                "technik": "Kaiten-Nage Uchi",
+                                                "variation": "TENKAN",
+                                                "angriffJap": "Yokomen-Uchi",
+                                                "angriffDe": "Schräger Schlag zum Hals",
+                                                "farbe": "Orange (4. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 43,
+                                                "technik": "Kaiten-Nage Uchi",
+                                                "variation": "TENKAN",
+                                                "angriffJap": "Shomen-uchi",
+                                                "angriffDe": "Gerader Schlag zum Kopf",
+                                                "farbe": "Orange (4. Kyu)",
+                                                "videos": {
+                                                                "Ruben Karl (Aikikai)": "https://youtu.be/u8WD-0W-pP4?si=AlT_mRKlAfgtwKnN&t=1066"
+                                                }
+                                },
+                                {
+                                                "id": 44,
+                                                "technik": "Kaiten-Nage Uchi",
+                                                "variation": "TENKAN",
+                                                "angriffJap": "Shomen-tsuki",
+                                                "angriffDe": "Gerader Fauststoß",
+                                                "farbe": "Orange (4. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 45,
+                                                "technik": "Kaiten-Nage Uchi",
+                                                "variation": "IRIMI",
+                                                "angriffJap": "Katate Tori - Aihanme",
+                                                "angriffDe": "Griff eines Handgelenks -schräg",
+                                                "farbe": "Orange (4. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 46,
+                                                "technik": "Kaiten-Nage Uchi",
+                                                "variation": "IRIMI",
+                                                "angriffJap": "Katate Tori - Gyakuhanme",
+                                                "angriffDe": "Griff eines Handgelenks - spiegelgleich",
+                                                "farbe": "Orange (4. Kyu)",
+                                                "videos": {
+                                                                "Ruben Karl (Aikikai)": "https://youtu.be/11lFn4wpfsk?si=KIYqzjua0o-LDF10&t=477"
+                                                }
+                                },
+                                {
+                                                "id": 47,
+                                                "technik": "Kaiten-Nage Uchi",
+                                                "variation": "TENKAN",
+                                                "angriffJap": "Katate Tori - Aihanme",
+                                                "angriffDe": "Griff eines Handgelenks -schräg",
+                                                "farbe": "Orange (4. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 48,
+                                                "technik": "Kaiten-Nage Uchi",
+                                                "variation": "TENKAN",
+                                                "angriffJap": "Katate Tori - Gyakuhanme",
+                                                "angriffDe": "Griff eines Handgelenks - spiegelgleich",
+                                                "farbe": "Orange (4. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 49,
+                                                "technik": "IRIMI-Nage",
+                                                "variation": "IRIMI",
+                                                "angriffJap": "Katate Tori - Aihanme",
+                                                "angriffDe": "Griff eines Handgelenks -schräg",
+                                                "farbe": "Orange (4. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 50,
+                                                "technik": "IRIMI-Nage",
+                                                "variation": "IRIMI",
+                                                "angriffJap": "Katate Tori - Gyakuhanme",
+                                                "angriffDe": "Griff eines Handgelenks - spiegelgleich",
+                                                "farbe": "Orange (4. Kyu)",
+                                                "videos": {
+                                                                "Ruben Karl (Aikikai)": "https://youtu.be/11lFn4wpfsk?si=p8JKbn3NYoSZh3Vq&t=367"
+                                                }
+                                },
+                                {
+                                                "id": 51,
+                                                "technik": "IRIMI-Nage",
+                                                "variation": "TENKAN",
+                                                "angriffJap": "Katate Tori - Aihanme",
+                                                "angriffDe": "Griff eines Handgelenks -schräg",
+                                                "farbe": "Orange (4. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 52,
+                                                "technik": "IRIMI-Nage",
+                                                "variation": "TENKAN",
+                                                "angriffJap": "Katate Tori - Gyakuhanme",
+                                                "angriffDe": "Griff eines Handgelenks - spiegelgleich",
+                                                "farbe": "Orange (4. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 53,
+                                                "technik": "IRIMI-Nage",
+                                                "variation": "IRIMI",
+                                                "angriffJap": "Katate Tori - Aihanme",
+                                                "angriffDe": "Griff eines Handgelenks -schräg",
+                                                "farbe": "Grün (3. Kyu)",
+                                                "videos": {
+                                                                "Howcast": "https://youtu.be/KihiVy0in4E?si=-8VYAGdktaQmyV_F&t=15"
+                                                }
+                                },
+                                {
+                                                "id": 54,
+                                                "technik": "IRIMI-Nage",
+                                                "variation": "TENKAN",
+                                                "angriffJap": "Katate Tori - Aihanme",
+                                                "angriffDe": "Griff eines Handgelenks -schräg",
+                                                "farbe": "Grün (3. Kyu)",
+                                                "videos": {
+                                                                "The Art of Aikido": "https://youtu.be/YGEZK8dRkrg?si=KYK2SWTREIrQM9JQ&t=2026"
+                                                }
+                                },
+                                {
+                                                "id": 55,
+                                                "technik": "IRIMI-Nage",
+                                                "variation": "IRIMI",
+                                                "angriffJap": "Katate Tori - Gyakuhanme",
+                                                "angriffDe": "Griff eines Handgelenks - spiegelgleich",
+                                                "farbe": "Grün (3. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 56,
+                                                "technik": "IRIMI-Nage",
+                                                "variation": "TENKAN",
+                                                "angriffJap": "Ryote-Tori",
+                                                "angriffDe": "Griff beider Handgelenke",
+                                                "farbe": "Grün (3. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 57,
+                                                "technik": "IRIMI-Nage",
+                                                "variation": "IRIMI",
+                                                "angriffJap": "Ryote-Tori",
+                                                "angriffDe": "Griff beider Handgelenke",
+                                                "farbe": "Grün (3. Kyu)",
+                                                "videos": {
+                                                                "Ruben Karl (Aikikai)": "https://youtu.be/LaSilceurNY?si=gaNl3j18MisYQRhg&t=869"
+                                                }
+                                },
+                                {
+                                                "id": 58,
+                                                "technik": "IRIMI-Nage",
+                                                "variation": "IRIMI",
+                                                "angriffJap": "Katate-ryote-tori",
+                                                "angriffDe": "Zwei Hände fassen ein Handgelenk",
+                                                "farbe": "Grün (3. Kyu)",
+                                                "videos": {
+                                                                "Ruben Karl (Aikikai)": "https://youtu.be/bi8t_-kLil8?si=Zi-WafUte8Vzz1Or&t=1768"
+                                                }
+                                },
+                                {
+                                                "id": 59,
+                                                "technik": "IRIMI-Nage",
+                                                "variation": "TENKAN",
+                                                "angriffJap": "Katate-ryote-tori",
+                                                "angriffDe": "Zwei Hände fassen ein Handgelenk",
+                                                "farbe": "Grün (3. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 60,
+                                                "technik": "IRIMI-Nage",
+                                                "variation": "IRIMI",
+                                                "angriffJap": "Ushiro-ryote-tori",
+                                                "angriffDe": "Griff beider Handgelenke von hinten",
+                                                "farbe": "Grün (3. Kyu)",
+                                                "videos": {
+                                                                "Deutscher Aikido Bund": "https://www.aikido-bund.de/filme/techniken/irimi-nage_katate-tori/irimi-nage_640.mp4"
+                                                }
+                                },
+                                {
+                                                "id": 61,
+                                                "technik": "IRIMI-Nage",
+                                                "variation": "IRIMI",
+                                                "angriffJap": "Yokomen-Uchi",
+                                                "angriffDe": "Schräger Schlag zum Hals",
+                                                "farbe": "Grün (3. Kyu)",
+                                                "videos": {
+                                                                "Ruben Karl (Aikikai)": "https://youtu.be/bi8t_-kLil8?si=gozG0pyk87dC9gGx&t=2237"
+                                                }
+                                },
+                                {
+                                                "id": 62,
+                                                "technik": "IRIMI-Nage",
+                                                "variation": "IRIMI",
+                                                "angriffJap": "Shomen-uchi",
+                                                "angriffDe": "Gerader Schlag zum Kopf",
+                                                "farbe": "Grün (3. Kyu)",
+                                                "videos": {
+                                                                "Ruben Karl (Aikikai)": "https://youtu.be/bi8t_-kLil8?si=mTzgUTfUJZU1D4m7&t=2171",
+                                                                "Howcast": "https://youtu.be/KihiVy0in4E?si=q8DF-6_51KnqZTPj&t=90"
+                                                }
+                                },
+                                {
+                                                "id": 63,
+                                                "technik": "IRIMI-Nage",
+                                                "variation": "IRIMI",
+                                                "angriffJap": "Shomen-tsuki",
+                                                "angriffDe": "Gerader Fauststoß",
+                                                "farbe": "Grün (3. Kyu)",
+                                                "videos": {
+                                                                "Ruben Karl (Aikikai)": "https://youtu.be/u8WD-0W-pP4?si=yYqB7IrkTuHyeONZ&t=2000",
+                                                                "The Art of Aikido": "https://youtu.be/Ll2MLdD3UiA?si=yYyJ-zs49l-CpjVM&t=525",
+                                                                "Howcast": "https://youtu.be/KihiVy0in4E?si=XA1Xc8Vpmi7VgQ9D&t=97"
+                                                }
+                                },
+                                {
+                                                "id": 64,
+                                                "technik": "IRIMI-Nage",
+                                                "variation": "TENKAN",
+                                                "angriffJap": "Ushiro-ryote-tori",
+                                                "angriffDe": "Griff beider Handgelenke von hinten",
+                                                "farbe": "Grün (3. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 65,
+                                                "technik": "IRIMI-Nage",
+                                                "variation": "TENKAN",
+                                                "angriffJap": "Yokomen-Uchi",
+                                                "angriffDe": "Schräger Schlag zum Hals",
+                                                "farbe": "Grün (3. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 66,
+                                                "technik": "IRIMI-Nage",
+                                                "variation": "TENKAN",
+                                                "angriffJap": "Shomen-uchi",
+                                                "angriffDe": "Gerader Schlag zum Kopf",
+                                                "farbe": "Grün (3. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 67,
+                                                "technik": "IRIMI-Nage",
+                                                "variation": "TENKAN",
+                                                "angriffJap": "Shomen-tsuki",
+                                                "angriffDe": "Gerader Fauststoß",
+                                                "farbe": "Grün (3. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 68,
+                                                "technik": "Kaiten-Nage Soto",
+                                                "variation": "IRIMI",
+                                                "angriffJap": "Katate Tori - Aihanme",
+                                                "angriffDe": "Griff eines Handgelenks -schräg",
+                                                "farbe": "Grün (3. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 69,
+                                                "technik": "Kaiten-Nage Soto",
+                                                "variation": "IRIMI",
+                                                "angriffJap": "Katate Tori - Gyakuhanme",
+                                                "angriffDe": "Griff eines Handgelenks - spiegelgleich",
+                                                "farbe": "Grün (3. Kyu)",
+                                                "videos": {
+                                                                "Ruben Karl (Aikikai)": "https://youtu.be/LaSilceurNY?si=ZMN8DuLSJuyS7BdP&t=555"
+                                                }
+                                },
+                                {
+                                                "id": 70,
+                                                "technik": "Kaiten-Nage Soto",
+                                                "variation": "TENKAN",
+                                                "angriffJap": "Katate Tori - Aihanme",
+                                                "angriffDe": "Griff eines Handgelenks -schräg",
+                                                "farbe": "Grün (3. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 71,
+                                                "technik": "Kaiten-Nage Soto",
+                                                "variation": "TENKAN",
+                                                "angriffJap": "Katate Tori - Gyakuhanme",
+                                                "angriffDe": "Griff eines Handgelenks - spiegelgleich",
+                                                "farbe": "Grün (3. Kyu)",
+                                                "videos": {
+                                                                "Deutscher Aikido Bund": "http://www.deutscher-aikido-bund.de/filme/techniken/kaiten-nage-soto_katate-tori/kaiten-nage-soto_640.mp4"
+                                                }
+                                },
+                                {
+                                                "id": 72,
+                                                "technik": "Kaiten-Nage Soto",
+                                                "variation": "IRIMI",
+                                                "angriffJap": "Yokomen-Uchi",
+                                                "angriffDe": "Schräger Schlag zum Hals",
+                                                "farbe": "Grün (3. Kyu)",
+                                                "videos": {
+                                                                "The Art of Aikido": "https://youtu.be/Ll2MLdD3UiA?si=Cgf_16FAx4Vf4h0y&t=2661"
+                                                }
+                                },
+                                {
+                                                "id": 73,
+                                                "technik": "Kaiten-Nage Soto",
+                                                "variation": "IRIMI",
+                                                "angriffJap": "Shomen-uchi",
+                                                "angriffDe": "Gerader Schlag zum Kopf",
+                                                "farbe": "Grün (3. Kyu)",
+                                                "videos": {
+                                                                "Ruben Karl (Aikikai)": "https://youtu.be/u8WD-0W-pP4?si=WV8tcXZwniwIqP8m&t=1003"
+                                                }
+                                },
+                                {
+                                                "id": 74,
+                                                "technik": "Kaiten-Nage Soto",
+                                                "variation": "TENKAN",
+                                                "angriffJap": "Yokomen-Uchi",
+                                                "angriffDe": "Schräger Schlag zum Hals",
+                                                "farbe": "Grün (3. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 75,
+                                                "technik": "Kaiten-Nage Soto",
+                                                "variation": "TENKAN",
+                                                "angriffJap": "Shomen-uchi",
+                                                "angriffDe": "Gerader Schlag zum Kopf",
+                                                "farbe": "Grün (3. Kyu)",
+                                                "videos": {
+                                                                "Ruben Karl (Aikikai)": "https://youtu.be/u8WD-0W-pP4?si=ePhkJBTiJ-N2brfW&t=1022"
+                                                }
+                                },
+                                {
+                                                "id": 76,
+                                                "technik": "Kote-Mawashi (Nikkyo)",
+                                                "variation": "IRIMI",
+                                                "angriffJap": "Katate Tori - Aihanme",
+                                                "angriffDe": "Griff eines Handgelenks -schräg",
+                                                "farbe": "Grün (3. Kyu)",
+                                                "videos": {
+                                                                "Ruben Karl (Aikikai)": "https://youtu.be/11lFn4wpfsk?si=s3meXLswjlebREAX&t=134",
+                                                                "François Pichereau": "https://youtu.be/hmhUozNZoYo"
+                                                }
+                                },
+                                {
+                                                "id": 77,
+                                                "technik": "Kote-Mawashi (Nikkyo)",
+                                                "variation": "IRIMI",
+                                                "angriffJap": "Katate Tori - Gyakuhanme",
+                                                "angriffDe": "Griff eines Handgelenks - spiegelgleich",
+                                                "farbe": "Grün (3. Kyu)",
+                                                "videos": {
+                                                                "Howcast": "https://youtu.be/ummLn3M_Sk8?si=-h_sHN-S6uKoXp8Q&t=17",
+                                                                "François Pichereau": "https://youtu.be/ESeQSfg1o3Q"
+                                                }
+                                },
+                                {
+                                                "id": 78,
+                                                "technik": "Kote-Mawashi (Nikkyo)",
+                                                "variation": "TENKAN",
+                                                "angriffJap": "Katate Tori - Aihanme",
+                                                "angriffDe": "Griff eines Handgelenks -schräg",
+                                                "farbe": "Grün (3. Kyu)",
+                                                "videos": {
+                                                                "Ruben Karl (Aikikai)": "https://youtu.be/11lFn4wpfsk?si=QV3QOMQt5587SENz&t=168"
+                                                }
+                                },
+                                {
+                                                "id": 79,
+                                                "technik": "Kote-Mawashi (Nikkyo)",
+                                                "variation": "TENKAN",
+                                                "angriffJap": "Katate Tori - Gyakuhanme",
+                                                "angriffDe": "Griff eines Handgelenks - spiegelgleich",
+                                                "farbe": "Grün (3. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 80,
+                                                "technik": "Kote-Mawashi (Nikkyo)",
+                                                "variation": "IRIMI",
+                                                "angriffJap": "Ryote-Tori",
+                                                "angriffDe": "Griff beider Handgelenke",
+                                                "farbe": "Grün (3. Kyu)",
+                                                "videos": {
+                                                                "Ruben Karl (Aikikai)": "https://youtu.be/LaSilceurNY?si=0BW6ZAOkcMVOcCQ3&t=689",
+                                                                "François Pichereau": "https://youtu.be/Iscwemzf96M"
+                                                }
+                                },
+                                {
+                                                "id": 81,
+                                                "technik": "Kote-Mawashi (Nikkyo)",
+                                                "variation": "IRIMI",
+                                                "angriffJap": "Katate-ryote-tori",
+                                                "angriffDe": "Zwei Hände fassen ein Handgelenk",
+                                                "farbe": "Grün (3. Kyu)",
+                                                "videos": {
+                                                                "Ruben Karl (Aikikai)": "https://youtu.be/bi8t_-kLil8?si=CbMh45NpDZ8Bc4Qi&t=1522",
+                                                                "François Pichereau": "https://www.youtube.com/watch?v=Ork8roqH68A"
+                                                }
+                                },
+                                {
+                                                "id": 82,
+                                                "technik": "Kote-Mawashi (Nikkyo)",
+                                                "variation": "IRIMI",
+                                                "angriffJap": "Mune-tori",
+                                                "angriffDe": "Griff zum Revers",
+                                                "farbe": "Grün (3. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 83,
+                                                "technik": "Kote-Mawashi (Nikkyo)",
+                                                "variation": "IRIMI",
+                                                "angriffJap": "Ushiro-ryokata-tori",
+                                                "angriffDe": "Griff beider Schultern von hinten",
+                                                "farbe": "Grün (3. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 84,
+                                                "technik": "Kote-Mawashi (Nikkyo)",
+                                                "variation": "IRIMI",
+                                                "angriffJap": "Ushiro-ryote-tori",
+                                                "angriffDe": "Griff beider Handgelenke von hinten",
+                                                "farbe": "Grün (3. Kyu)",
+                                                "videos": {
+                                                                "Ruben Karl (Aikikai)": "https://youtu.be/bi8t_-kLil8?si=93QgykHm5zbyQx6W&t=2425"
+                                                }
+                                },
+                                {
+                                                "id": 85,
+                                                "technik": "Kote-Mawashi (Nikkyo)",
+                                                "variation": "IRIMI",
+                                                "angriffJap": "Ushiro-eri-tori",
+                                                "angriffDe": "Griff von hinten in den Kragen",
+                                                "farbe": "Grün (3. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 86,
+                                                "technik": "Kote-Mawashi (Nikkyo)",
+                                                "variation": "IRIMI",
+                                                "angriffJap": "Ushiro-katate-tori-kubi-shime",
+                                                "angriffDe": "Griff eines Handgelenks und würgen von hinten",
+                                                "farbe": "Grün (3. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 87,
+                                                "technik": "Kote-Mawashi (Nikkyo)",
+                                                "variation": "IRIMI",
+                                                "angriffJap": "Yokomen-Uchi",
+                                                "angriffDe": "Schräger Schlag zum Hals",
+                                                "farbe": "Grün (3. Kyu)",
+                                                "videos": {
+                                                                "Ruben Karl (Aikikai)": "https://youtu.be/u8WD-0W-pP4?si=pe2D_hffBBfEjypT&t=1436",
+                                                                "Howcast": "https://youtu.be/ummLn3M_Sk8?si=xQkcdEAYBjDyGCNq&t=92",
+                                                                "François Pichereau": "https://youtu.be/Sqx6kDmkq0A"
+                                                }
+                                },
+                                {
+                                                "id": 88,
+                                                "technik": "Kote-Mawashi (Nikkyo)",
+                                                "variation": "IRIMI",
+                                                "angriffJap": "Shomen-uchi",
+                                                "angriffDe": "Gerader Schlag zum Kopf",
+                                                "farbe": "Grün (3. Kyu)",
+                                                "videos": {
+                                                                "Ruben Karl (Aikikai)": "https://youtu.be/bi8t_-kLil8?si=Xca9b8Q_WvMCIpPQ&t=1977",
+                                                                "François Pichereau": "https://youtu.be/5l5aM_Li1oo"
+                                                }
+                                },
+                                {
+                                                "id": 89,
+                                                "technik": "Kote-Mawashi (Nikkyo)",
+                                                "variation": "IRIMI",
+                                                "angriffJap": "Shomen-tsuki",
+                                                "angriffDe": "Gerader Fauststoß",
+                                                "farbe": "Grün (3. Kyu)",
+                                                "videos": {
+                                                                "Ruben Karl (Aikikai)": "https://youtu.be/u8WD-0W-pP4?si=d7iAi5KMgDwBWZgA&t=1815",
+                                                                "Howcast": "https://youtu.be/ummLn3M_Sk8?si=XUTuEfbB-QVccFXb&t=103",
+                                                                "François Pichereau": "https://youtu.be/NbNbueFTsw4"
+                                                }
+                                },
+                                {
+                                                "id": 90,
+                                                "technik": "Kote-Mawashi (Nikkyo)",
+                                                "variation": "TENKAN",
+                                                "angriffJap": "Ryote-Tori",
+                                                "angriffDe": "Griff beider Handgelenke",
+                                                "farbe": "Grün (3. Kyu)",
+                                                "videos": {
+                                                                "Ruben Karl (Aikikai)": "https://youtu.be/LaSilceurNY?si=e7C_eA1CtIAHOMZy&t=723"
+                                                }
+                                },
+                                {
+                                                "id": 91,
+                                                "technik": "Kote-Mawashi (Nikkyo)",
+                                                "variation": "TENKAN",
+                                                "angriffJap": "Katate-ryote-tori",
+                                                "angriffDe": "Zwei Hände fassen ein Handgelenk",
+                                                "farbe": "Grün (3. Kyu)",
+                                                "videos": {
+                                                                "Ruben Karl (Aikikai)": "https://youtu.be/bi8t_-kLil8?si=9qjQDcNZO3ba_A0M&t=1565"
+                                                }
+                                },
+                                {
+                                                "id": 92,
+                                                "technik": "Kote-Mawashi (Nikkyo)",
+                                                "variation": "TENKAN",
+                                                "angriffJap": "Mune-tori",
+                                                "angriffDe": "Griff zum Revers",
+                                                "farbe": "Grün (3. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 93,
+                                                "technik": "Kote-Mawashi (Nikkyo)",
+                                                "variation": "TENKAN",
+                                                "angriffJap": "Ushiro-ryokata-tori",
+                                                "angriffDe": "Griff beider Schultern von hinten",
+                                                "farbe": "Grün (3. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 94,
+                                                "technik": "Kote-Mawashi (Nikkyo)",
+                                                "variation": "TENKAN",
+                                                "angriffJap": "Ushiro-ryote-tori",
+                                                "angriffDe": "Griff beider Handgelenke von hinten",
+                                                "farbe": "Grün (3. Kyu)",
+                                                "videos": {
+                                                                "Ruben Karl (Aikikai)": "https://youtu.be/bi8t_-kLil8?si=5P_5PlpAYh4iK93q&t=2466"
+                                                }
+                                },
+                                {
+                                                "id": 95,
+                                                "technik": "Kote-Mawashi (Nikkyo)",
+                                                "variation": "TENKAN",
+                                                "angriffJap": "Ushiro-eri-tori",
+                                                "angriffDe": "Griff von hinten in den Kragen",
+                                                "farbe": "Grün (3. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 96,
+                                                "technik": "Kote-Mawashi (Nikkyo)",
+                                                "variation": "TENKAN",
+                                                "angriffJap": "Ushiro-katate-tori-kubi-shime",
+                                                "angriffDe": "Griff eines Handgelenks und würgen von hinten",
+                                                "farbe": "Grün (3. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 97,
+                                                "technik": "Kote-Mawashi (Nikkyo)",
+                                                "variation": "TENKAN",
+                                                "angriffJap": "Yokomen-Uchi",
+                                                "angriffDe": "Schräger Schlag zum Hals",
+                                                "farbe": "Grün (3. Kyu)",
+                                                "videos": {
+                                                                "Ruben Karl (Aikikai)": "https://youtu.be/u8WD-0W-pP4?si=t8uiZVRZ-iXYABNT&t=1469"
+                                                }
+                                },
+                                {
+                                                "id": 98,
+                                                "technik": "Kote-Mawashi (Nikkyo)",
+                                                "variation": "TENKAN",
+                                                "angriffJap": "Shomen-uchi",
+                                                "angriffDe": "Gerader Schlag zum Kopf",
+                                                "farbe": "Grün (3. Kyu)",
+                                                "videos": {
+                                                                "Ruben Karl (Aikikai)": "https://youtu.be/bi8t_-kLil8?si=EGbX1h5dfK71OhBA&t=2008"
+                                                }
+                                },
+                                {
+                                                "id": 99,
+                                                "technik": "Kote-Mawashi (Nikkyo)",
+                                                "variation": "TENKAN",
+                                                "angriffJap": "Shomen-tsuki",
+                                                "angriffDe": "Gerader Fauststoß",
+                                                "farbe": "Grün (3. Kyu)",
+                                                "videos": {
+                                                                "Ruben Karl (Aikikai)": "https://youtu.be/u8WD-0W-pP4?si=KdNSeuvONY-bBcqo&t=1843"
+                                                }
+                                },
+                                {
+                                                "id": 100,
+                                                "technik": "Aiki-Otoshi",
+                                                "variation": "",
+                                                "angriffJap": "Yoko-kubi-shime",
+                                                "angriffDe": "Würgen von der Seite",
+                                                "farbe": "Blau (2. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 101,
+                                                "technik": "Aiki-Otoshi",
+                                                "variation": "",
+                                                "angriffJap": "Ushiro-ryokata-tori",
+                                                "angriffDe": "Griff beider Schultern von hinten",
+                                                "farbe": "Blau (2. Kyu)",
+                                                "videos": {
+                                                                "Deutscher Aikido Bund": "https://www.aikido-bund.de/filme/techniken/aiki-otoshi_ushiro-ryokata-tori/aiki-otoshi_640.mp4"
+                                                }
+                                },
+                                {
+                                                "id": 102,
+                                                "technik": "Aiki-Otoshi",
+                                                "variation": "",
+                                                "angriffJap": "Ushiro-kakae-tori",
+                                                "angriffDe": "Umklammerung von hinten",
+                                                "farbe": "Blau (2. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 103,
+                                                "technik": "Koshi-Nage",
+                                                "variation": "",
+                                                "angriffJap": "Ryote-Tori",
+                                                "angriffDe": "Griff beider Handgelenke",
+                                                "farbe": "Blau (2. Kyu)",
+                                                "videos": {
+                                                                "The Art of Aikido": "https://youtu.be/-zb099Gwmew?si=qvGD-ipB1BILAott&t=2794"
+                                                }
+                                },
+                                {
+                                                "id": 104,
+                                                "technik": "Koshi-Nage",
+                                                "variation": "",
+                                                "angriffJap": "Mune-tori",
+                                                "angriffDe": "Griff zum Revers",
+                                                "farbe": "Blau (2. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 105,
+                                                "technik": "Koshi-Nage",
+                                                "variation": "",
+                                                "angriffJap": "Yoko-kubi-shime",
+                                                "angriffDe": "Würgen von der Seite",
+                                                "farbe": "Blau (2. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 106,
+                                                "technik": "Koshi-Nage",
+                                                "variation": "",
+                                                "angriffJap": "Ushiro-katate-tori-kubi-shime",
+                                                "angriffDe": "Griff eines Handgelenks und würgen von hinten",
+                                                "farbe": "Blau (2. Kyu)",
+                                                "videos": {
+                                                                "The Art of Aikido": "https://youtu.be/-zb099Gwmew?si=n4ppOoQKc0xGaqot&t=3084"
+                                                }
+                                },
+                                {
+                                                "id": 107,
+                                                "technik": "Koshi-Nage",
+                                                "variation": "",
+                                                "angriffJap": "Ushiro-kubi-shime",
+                                                "angriffDe": "Würgen von hinten",
+                                                "farbe": "Blau (2. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 108,
+                                                "technik": "Koshi-Nage",
+                                                "variation": "",
+                                                "angriffJap": "Yokomen-Uchi",
+                                                "angriffDe": "Schräger Schlag zum Hals",
+                                                "farbe": "Blau (2. Kyu)",
+                                                "videos": {
+                                                                "Ruben Karl (Aikikai)": "https://youtu.be/u8WD-0W-pP4?si=oxFbXCrcfwb4sVqS&t=1697",
+                                                                "The Art of Aikido": "https://youtu.be/-zb099Gwmew?si=u3ETdgmM0rs5c1BB&t=3061",
+                                                                "François Pichereau": "https://youtu.be/HElGR2k5uxI"
+                                                }
+                                },
+                                {
+                                                "id": 109,
+                                                "technik": "Koshi-Nage",
+                                                "variation": "",
+                                                "angriffJap": "Shomen-uchi",
+                                                "angriffDe": "Gerader Schlag zum Kopf",
+                                                "farbe": "Blau (2. Kyu)",
+                                                "videos": {
+                                                                "Ruben Karl (Aikikai)": "https://youtu.be/u8WD-0W-pP4?si=8baV1gVL2zqs9ZfE&t=1093",
+                                                                "The Art of Aikido": "https://youtu.be/-zb099Gwmew?si=UHLLF3DyKrNPRaJc&t=3055",
+                                                                "François Pichereau": "https://youtu.be/YbCHLQt7F9c"
+                                                }
+                                },
+                                {
+                                                "id": 110,
+                                                "technik": "Koshi-Nage",
+                                                "variation": "",
+                                                "angriffJap": "Shomen-tsuki",
+                                                "angriffDe": "Gerader Fauststoß",
+                                                "farbe": "Blau (2. Kyu)",
+                                                "videos": {
+                                                                "François Pichereau": "https://www.youtube.com/watch?v=cbeuCeU9WI4"
+                                                }
+                                },
+                                {
+                                                "id": 111,
+                                                "technik": "Koshi-Nage Hiji-Garami",
+                                                "variation": "",
+                                                "angriffJap": "Ryote-Tori",
+                                                "angriffDe": "Griff beider Handgelenke",
+                                                "farbe": "Blau (2. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 112,
+                                                "technik": "Koshi-Nage Hiji-Garami",
+                                                "variation": "",
+                                                "angriffJap": "Mune-tori",
+                                                "angriffDe": "Griff zum Revers",
+                                                "farbe": "Blau (2. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 113,
+                                                "technik": "Koshi-Nage Hiji-Garami",
+                                                "variation": "",
+                                                "angriffJap": "Yoko-kubi-shime",
+                                                "angriffDe": "Würgen von der Seite",
+                                                "farbe": "Blau (2. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 114,
+                                                "technik": "Koshi-Nage Hiji-Garami",
+                                                "variation": "",
+                                                "angriffJap": "Ushiro-katate-tori-kubi-shime",
+                                                "angriffDe": "Griff eines Handgelenks und würgen von hinten",
+                                                "farbe": "Blau (2. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 115,
+                                                "technik": "Koshi-Nage Hiji-Garami",
+                                                "variation": "",
+                                                "angriffJap": "Ushiro-kubi-shime",
+                                                "angriffDe": "Würgen von hinten",
+                                                "farbe": "Blau (2. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 116,
+                                                "technik": "Koshi-Nage Hiji-Garami",
+                                                "variation": "",
+                                                "angriffJap": "Yokomen-Uchi",
+                                                "angriffDe": "Schräger Schlag zum Hals",
+                                                "farbe": "Blau (2. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 117,
+                                                "technik": "Koshi-Nage Hiji-Garami",
+                                                "variation": "",
+                                                "angriffJap": "Shomen-uchi",
+                                                "angriffDe": "Gerader Schlag zum Kopf",
+                                                "farbe": "Blau (2. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 118,
+                                                "technik": "Koshi-Nage Hiji-Garami",
+                                                "variation": "",
+                                                "angriffJap": "Shomen-tsuki",
+                                                "angriffDe": "Gerader Fauststoß",
+                                                "farbe": "Blau (2. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 119,
+                                                "technik": "Koshi-Nage Kote-Hineri",
+                                                "variation": "",
+                                                "angriffJap": "Yoko-kubi-shime",
+                                                "angriffDe": "Würgen von der Seite",
+                                                "farbe": "Blau (2. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 120,
+                                                "technik": "Koshi-Nage Kote-Hineri",
+                                                "variation": "",
+                                                "angriffJap": "Ushiro-ryokata-tori",
+                                                "angriffDe": "Griff beider Schultern von hinten",
+                                                "farbe": "Blau (2. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 121,
+                                                "technik": "Koshi-Nage Kote-Hineri",
+                                                "variation": "",
+                                                "angriffJap": "Ushiro-kakae-tori",
+                                                "angriffDe": "Umklammerung von hinten",
+                                                "farbe": "Blau (2. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 122,
+                                                "technik": "Koshi-Nage Kote-Hineri",
+                                                "variation": "",
+                                                "angriffJap": "Ryote-Tori",
+                                                "angriffDe": "Griff beider Handgelenke",
+                                                "farbe": "Blau (2. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 123,
+                                                "technik": "Koshi-Nage Kote-Hineri",
+                                                "variation": "",
+                                                "angriffJap": "Mune-tori",
+                                                "angriffDe": "Griff zum Revers",
+                                                "farbe": "Blau (2. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 124,
+                                                "technik": "Koshi-Nage Kote-Hineri",
+                                                "variation": "",
+                                                "angriffJap": "Yoko-kubi-shime",
+                                                "angriffDe": "Würgen von der Seite",
+                                                "farbe": "Blau (2. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 125,
+                                                "technik": "Koshi-Nage Kote-Hineri",
+                                                "variation": "",
+                                                "angriffJap": "Ushiro-katate-tori-kubi-shime",
+                                                "angriffDe": "Griff eines Handgelenks und würgen von hinten",
+                                                "farbe": "Blau (2. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 126,
+                                                "technik": "Koshi-Nage Kote-Hineri",
+                                                "variation": "",
+                                                "angriffJap": "Ushiro-kubi-shime",
+                                                "angriffDe": "Würgen von hinten",
+                                                "farbe": "Blau (2. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 127,
+                                                "technik": "Koshi-Nage Kote-Hineri",
+                                                "variation": "",
+                                                "angriffJap": "Yokomen-Uchi",
+                                                "angriffDe": "Schräger Schlag zum Hals",
+                                                "farbe": "Blau (2. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 128,
+                                                "technik": "Koshi-Nage Kote-Hineri",
+                                                "variation": "",
+                                                "angriffJap": "Shomen-uchi",
+                                                "angriffDe": "Gerader Schlag zum Kopf",
+                                                "farbe": "Blau (2. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 129,
+                                                "technik": "Koshi-Nage Kote-Hineri",
+                                                "variation": "",
+                                                "angriffJap": "Shomen-tsuki",
+                                                "angriffDe": "Gerader Fauststoß",
+                                                "farbe": "Blau (2. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 130,
+                                                "technik": "Kote-Hineri (Sankyo)",
+                                                "variation": "IRIMI",
+                                                "angriffJap": "Katate Tori - Aihanme",
+                                                "angriffDe": "Griff eines Handgelenks -schräg",
+                                                "farbe": "Blau (2. Kyu)",
+                                                "videos": {
+                                                                "François Pichereau": "https://youtu.be/JNucTtFGZGw"
+                                                }
+                                },
+                                {
+                                                "id": 131,
+                                                "technik": "Kote-Hineri (Sankyo)",
+                                                "variation": "IRIMI",
+                                                "angriffJap": "Katate Tori - Gyakuhanme",
+                                                "angriffDe": "Griff eines Handgelenks - spiegelgleich",
+                                                "farbe": "Blau (2. Kyu)",
+                                                "videos": {
+                                                                "François Pichereau": "https://youtu.be/bYtGQgp21gk"
+                                                }
+                                },
+                                {
+                                                "id": 132,
+                                                "technik": "Kote-Hineri (Sankyo)",
+                                                "variation": "IRIMI",
+                                                "angriffJap": "Ryote-Tori",
+                                                "angriffDe": "Griff beider Handgelenke",
+                                                "farbe": "Blau (2. Kyu)",
+                                                "videos": {
+                                                                "François Pichereau": "https://youtu.be/jSCep3k6fKM"
+                                                }
+                                },
+                                {
+                                                "id": 133,
+                                                "technik": "Kote-Hineri (Sankyo)",
+                                                "variation": "IRIMI",
+                                                "angriffJap": "Katate-ryote-tori",
+                                                "angriffDe": "Zwei Hände fassen ein Handgelenk",
+                                                "farbe": "Blau (2. Kyu)",
+                                                "videos": {
+                                                                "François Pichereau": "https://youtu.be/6ET3YYQOBF0"
+                                                }
+                                },
+                                {
+                                                "id": 134,
+                                                "technik": "Kote-Hineri (Sankyo)",
+                                                "variation": "IRIMI",
+                                                "angriffJap": "Mune-tori",
+                                                "angriffDe": "Griff zum Revers",
+                                                "farbe": "Blau (2. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 135,
+                                                "technik": "Kote-Hineri (Sankyo)",
+                                                "variation": "IRIMI",
+                                                "angriffJap": "Ushiro-ryokata-tori",
+                                                "angriffDe": "Griff beider Schultern von hinten",
+                                                "farbe": "Blau (2. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 136,
+                                                "technik": "Kote-Hineri (Sankyo)",
+                                                "variation": "IRIMI",
+                                                "angriffJap": "Ushiro-ryote-tori",
+                                                "angriffDe": "Griff beider Handgelenke von hinten",
+                                                "farbe": "Blau (2. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 137,
+                                                "technik": "Kote-Hineri (Sankyo)",
+                                                "variation": "IRIMI",
+                                                "angriffJap": "Ushiro-eri-tori",
+                                                "angriffDe": "Griff von hinten in den Kragen",
+                                                "farbe": "Blau (2. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 138,
+                                                "technik": "Kote-Hineri (Sankyo)",
+                                                "variation": "IRIMI",
+                                                "angriffJap": "Ushiro-katate-tori-kubi-shime",
+                                                "angriffDe": "Griff eines Handgelenks und würgen von hinten",
+                                                "farbe": "Blau (2. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 139,
+                                                "technik": "Kote-Hineri (Sankyo)",
+                                                "variation": "IRIMI",
+                                                "angriffJap": "Ushiro-kubi-shime",
+                                                "angriffDe": "Würgen von hinten",
+                                                "farbe": "Blau (2. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 140,
+                                                "technik": "Kote-Hineri (Sankyo)",
+                                                "variation": "IRIMI",
+                                                "angriffJap": "Yokomen-Uchi",
+                                                "angriffDe": "Schräger Schlag zum Hals",
+                                                "farbe": "Blau (2. Kyu)",
+                                                "videos": {
+                                                                "The Art of Aikido": "https://youtu.be/Ll2MLdD3UiA?si=zEY24_plZ9ZGiPuL&t=2697",
+                                                                "François Pichereau": "https://youtu.be/uiaopY89OPY?list=TLPQMjExMjIwMjT_wVQWlZj1hg"
+                                                }
+                                },
+                                {
+                                                "id": 141,
+                                                "technik": "Kote-Hineri (Sankyo)",
+                                                "variation": "IRIMI",
+                                                "angriffJap": "Shomen-uchi",
+                                                "angriffDe": "Gerader Schlag zum Kopf",
+                                                "farbe": "Blau (2. Kyu)",
+                                                "videos": {
+                                                                "François Pichereau": "https://youtu.be/UpkQJjEhHhc?list=TLPQMjExMjIwMjT_wVQWlZj1hg"
+                                                }
+                                },
+                                {
+                                                "id": 142,
+                                                "technik": "Kote-Hineri (Sankyo)",
+                                                "variation": "IRIMI",
+                                                "angriffJap": "Shomen-tsuki",
+                                                "angriffDe": "Gerader Fauststoß",
+                                                "farbe": "Blau (2. Kyu)",
+                                                "videos": {
+                                                                "François Pichereau": "https://youtu.be/44lXrmJg_E4"
+                                                }
+                                },
+                                {
+                                                "id": 143,
+                                                "technik": "Kote-Hineri (Sankyo)",
+                                                "variation": "TENKAN",
+                                                "angriffJap": "Katate Tori - Aihanme",
+                                                "angriffDe": "Griff eines Handgelenks -schräg",
+                                                "farbe": "Blau (2. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 144,
+                                                "technik": "Kote-Hineri (Sankyo)",
+                                                "variation": "TENKAN",
+                                                "angriffJap": "Katate Tori - Gyakuhanme",
+                                                "angriffDe": "Griff eines Handgelenks - spiegelgleich",
+                                                "farbe": "Blau (2. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 145,
+                                                "technik": "Kote-Hineri (Sankyo)",
+                                                "variation": "TENKAN",
+                                                "angriffJap": "Ryote-Tori",
+                                                "angriffDe": "Griff beider Handgelenke",
+                                                "farbe": "Blau (2. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 146,
+                                                "technik": "Kote-Hineri (Sankyo)",
+                                                "variation": "TENKAN",
+                                                "angriffJap": "Katate-ryote-tori",
+                                                "angriffDe": "Zwei Hände fassen ein Handgelenk",
+                                                "farbe": "Blau (2. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 147,
+                                                "technik": "Kote-Hineri (Sankyo)",
+                                                "variation": "TENKAN",
+                                                "angriffJap": "Mune-tori",
+                                                "angriffDe": "Griff zum Revers",
+                                                "farbe": "Blau (2. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 148,
+                                                "technik": "Kote-Hineri (Sankyo)",
+                                                "variation": "TENKAN",
+                                                "angriffJap": "Ushiro-ryokata-tori",
+                                                "angriffDe": "Griff beider Schultern von hinten",
+                                                "farbe": "Blau (2. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 149,
+                                                "technik": "Kote-Hineri (Sankyo)",
+                                                "variation": "TENKAN",
+                                                "angriffJap": "Ushiro-ryote-tori",
+                                                "angriffDe": "Griff beider Handgelenke von hinten",
+                                                "farbe": "Blau (2. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 150,
+                                                "technik": "Kote-Hineri (Sankyo)",
+                                                "variation": "TENKAN",
+                                                "angriffJap": "Ushiro-eri-tori",
+                                                "angriffDe": "Griff von hinten in den Kragen",
+                                                "farbe": "Blau (2. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 151,
+                                                "technik": "Kote-Hineri (Sankyo)",
+                                                "variation": "TENKAN",
+                                                "angriffJap": "Ushiro-katate-tori-kubi-shime",
+                                                "angriffDe": "Griff eines Handgelenks und würgen von hinten",
+                                                "farbe": "Blau (2. Kyu)",
+                                                "videos": {
+                                                                "The Art of Aikido": "https://youtu.be/cB3kMQZmrpo?si=jnXPlCfIlPPWF-qP&t=2200"
+                                                }
+                                },
+                                {
+                                                "id": 152,
+                                                "technik": "Kote-Hineri (Sankyo)",
+                                                "variation": "TENKAN",
+                                                "angriffJap": "Ushiro-kubi-shime",
+                                                "angriffDe": "Würgen von hinten",
+                                                "farbe": "Blau (2. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 153,
+                                                "technik": "Kote-Hineri (Sankyo)",
+                                                "variation": "TENKAN",
+                                                "angriffJap": "Yokomen-Uchi",
+                                                "angriffDe": "Schräger Schlag zum Hals",
+                                                "farbe": "Blau (2. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 154,
+                                                "technik": "Kote-Hineri (Sankyo)",
+                                                "variation": "TENKAN",
+                                                "angriffJap": "Shomen-uchi",
+                                                "angriffDe": "Gerader Schlag zum Kopf",
+                                                "farbe": "Blau (2. Kyu)",
+                                                "videos": {
+                                                                "Howcast": "https://youtu.be/u71nroaAXnM?si=A4v4ATseoK9fOEj0&t=16"
+                                                }
+                                },
+                                {
+                                                "id": 155,
+                                                "technik": "Kote-Hineri (Sankyo)",
+                                                "variation": "TENKAN",
+                                                "angriffJap": "Shomen-tsuki",
+                                                "angriffDe": "Gerader Fauststoß",
+                                                "farbe": "Blau (2. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 156,
+                                                "technik": "Kote Gaeshi",
+                                                "variation": "IRIMI",
+                                                "angriffJap": "Katate Tori - Aihanme",
+                                                "angriffDe": "Griff eines Handgelenks -schräg",
+                                                "farbe": "Braun (1. Kyu)",
+                                                "videos": {
+                                                                "Howcast": "https://youtu.be/ll1GCzl4Bxg?si=IGUFOaSi9VHyBYaN&t=10",
+                                                                "François Pichereau": "https://youtu.be/LhDFNQzYKE8"
+                                                }
+                                },
+                                {
+                                                "id": 157,
+                                                "technik": "Kote Gaeshi",
+                                                "variation": "IRIMI",
+                                                "angriffJap": "Katate Tori - Gyakuhanme",
+                                                "angriffDe": "Griff eines Handgelenks - spiegelgleich",
+                                                "farbe": "Braun (1. Kyu)",
+                                                "videos": {
+                                                                "François Pichereau": "https://youtu.be/hRIccRuhbSA"
+                                                }
+                                },
+                                {
+                                                "id": 158,
+                                                "technik": "Kote Gaeshi",
+                                                "variation": "IRIMI",
+                                                "angriffJap": "Ryote-Tori",
+                                                "angriffDe": "Griff beider Handgelenke",
+                                                "farbe": "Braun (1. Kyu)",
+                                                "videos": {
+                                                                "François Pichereau": "https://youtu.be/8bcHCMOuU-E"
+                                                }
+                                },
+                                {
+                                                "id": 159,
+                                                "technik": "Kote Gaeshi",
+                                                "variation": "IRIMI",
+                                                "angriffJap": "Katate-ryote-tori",
+                                                "angriffDe": "Zwei Hände fassen ein Handgelenk",
+                                                "farbe": "Braun (1. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 160,
+                                                "technik": "Kote Gaeshi",
+                                                "variation": "IRIMI",
+                                                "angriffJap": "Ushiro-ryote-tori",
+                                                "angriffDe": "Griff beider Handgelenke von hinten",
+                                                "farbe": "Braun (1. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 161,
+                                                "technik": "Kote Gaeshi",
+                                                "variation": "IRIMI",
+                                                "angriffJap": "Yokomen-Uchi",
+                                                "angriffDe": "Schräger Schlag zum Hals",
+                                                "farbe": "Braun (1. Kyu)",
+                                                "videos": {
+                                                                "The Art of Aikido": "https://youtu.be/Ll2MLdD3UiA?si=-kVCf3W09cPSnIfU&t=2256",
+                                                                "Howcast": "https://youtu.be/ll1GCzl4Bxg?si=i7dIrfYOphIIl-xu&t=83",
+                                                                "François Pichereau": "https://youtu.be/nRCBMNb7Go4"
+                                                }
+                                },
+                                {
+                                                "id": 162,
+                                                "technik": "Kote Gaeshi",
+                                                "variation": "IRIMI",
+                                                "angriffJap": "Shomen-uchi",
+                                                "angriffDe": "Gerader Schlag zum Kopf",
+                                                "farbe": "Braun (1. Kyu)",
+                                                "videos": {
+                                                                "Howcast": "https://youtu.be/ll1GCzl4Bxg?si=aTdoabhPtxru80DV&t=77",
+                                                                "François Pichereau": "https://youtu.be/4ZP4PpJVjK4"
+                                                }
+                                },
+                                {
+                                                "id": 163,
+                                                "technik": "Kote Gaeshi",
+                                                "variation": "IRIMI",
+                                                "angriffJap": "Shomen-tsuki",
+                                                "angriffDe": "Gerader Fauststoß",
+                                                "farbe": "Braun (1. Kyu)",
+                                                "videos": {
+                                                                "Howcast": "https://youtu.be/ll1GCzl4Bxg?si=cSE4DtNelm-9d95O&t=74",
+                                                                "Deutscher Aikido Bund": "http://www.deutscher-aikido-bund.de/filme/techniken/kote-gaeshi_shomen-tsuki/kote-gaeshi_640.mp4",
+                                                                "François Pichereau": "https://youtu.be/9B0FDMGLeiE"
+                                                }
+                                },
+                                {
+                                                "id": 164,
+                                                "technik": "Kote Gaeshi",
+                                                "variation": "TENKAN",
+                                                "angriffJap": "Katate Tori - Aihanme",
+                                                "angriffDe": "Griff eines Handgelenks -schräg",
+                                                "farbe": "Braun (1. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 165,
+                                                "technik": "Kote Gaeshi",
+                                                "variation": "TENKAN",
+                                                "angriffJap": "Katate Tori - Gyakuhanme",
+                                                "angriffDe": "Griff eines Handgelenks - spiegelgleich",
+                                                "farbe": "Braun (1. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 166,
+                                                "technik": "Kote Gaeshi",
+                                                "variation": "TENKAN",
+                                                "angriffJap": "Ryote-Tori",
+                                                "angriffDe": "Griff beider Handgelenke",
+                                                "farbe": "Braun (1. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 167,
+                                                "technik": "Kote Gaeshi",
+                                                "variation": "TENKAN",
+                                                "angriffJap": "Katate-ryote-tori",
+                                                "angriffDe": "Zwei Hände fassen ein Handgelenk",
+                                                "farbe": "Braun (1. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 168,
+                                                "technik": "Kote Gaeshi",
+                                                "variation": "TENKAN",
+                                                "angriffJap": "Ushiro-ryote-tori",
+                                                "angriffDe": "Griff beider Handgelenke von hinten",
+                                                "farbe": "Braun (1. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 169,
+                                                "technik": "Kote Gaeshi",
+                                                "variation": "TENKAN",
+                                                "angriffJap": "Yokomen-Uchi",
+                                                "angriffDe": "Schräger Schlag zum Hals",
+                                                "farbe": "Braun (1. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 170,
+                                                "technik": "Kote Gaeshi",
+                                                "variation": "TENKAN",
+                                                "angriffJap": "Shomen-uchi",
+                                                "angriffDe": "Gerader Schlag zum Kopf",
+                                                "farbe": "Braun (1. Kyu)",
+                                                "videos": {
+                                                                "The Art of Aikido": "https://youtu.be/cB3kMQZmrpo?si=lLKnQKo41XxX2CS2&t=1213"
+                                                }
+                                },
+                                {
+                                                "id": 171,
+                                                "technik": "Kote Gaeshi",
+                                                "variation": "TENKAN",
+                                                "angriffJap": "Shomen-tsuki",
+                                                "angriffDe": "Gerader Fauststoß",
+                                                "farbe": "Braun (1. Kyu)",
+                                                "videos": {
+                                                                "Ruben Karl (Aikikai)": "https://youtu.be/u8WD-0W-pP4?si=DcdrtAZm7G23pGto&t=2018",
+                                                                "The Art of Aikido": "https://youtu.be/Ll2MLdD3UiA?si=lOWpSBZmbzk1wrvB&t=786"
+                                                }
+                                },
+                                {
+                                                "id": 172,
+                                                "technik": "Koshi-Nage-hiji-garami",
+                                                "variation": "",
+                                                "angriffJap": "Ushiro-ryote-tori",
+                                                "angriffDe": "Griff beider Handgelenke von hinten",
+                                                "farbe": "Braun (1. Kyu)",
+                                                "videos": {
+                                                                "Ruben Karl (Aikikai)": "https://aikido-bund.de/pdfs/kriterien/koshi-nage-hiji-garami.pdf"
+                                                }
+                                },
+                                {
+                                                "id": 173,
+                                                "technik": "Koshi-Nage-kote-hineri",
+                                                "variation": "",
+                                                "angriffJap": "Ushiro-ryote-tori",
+                                                "angriffDe": "Griff beider Handgelenke von hinten",
+                                                "farbe": "Braun (1. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 174,
+                                                "technik": "Juji-Garami / Juji-Nage",
+                                                "variation": "",
+                                                "angriffJap": "Ushiro-ryote-tori",
+                                                "angriffDe": "Griff beider Handgelenke von hinten",
+                                                "farbe": "Braun (1. Kyu)",
+                                                "videos": {
+                                                                "Ruben Karl (Aikikai)": "https://youtu.be/u8WD-0W-pP4?si=ZbZa2E8_mQCQaOji&t=2110",
+                                                                "Deutscher Aikido Bund": "http://www.deutscher-aikido-bund.de/filme/techniken/juji-garami_ushiro-ryote-tori/juji-garami_640.mp4"
+                                                }
+                                },
+                                {
+                                                "id": 175,
+                                                "technik": "Juji-Garami / Juji-Nage",
+                                                "variation": "",
+                                                "angriffJap": "Ushiro-katate-tori-kubi-shime",
+                                                "angriffDe": "Griff eines Handgelenks und würgen von hinten",
+                                                "farbe": "Braun (1. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 176,
+                                                "technik": "Tekubi-osae (Yonkyo)",
+                                                "variation": "",
+                                                "angriffJap": "Katate Tori - Aihanme",
+                                                "angriffDe": "Griff eines Handgelenks -schräg",
+                                                "farbe": "Braun (1. Kyu)",
+                                                "videos": {
+                                                                "Howcast": "https://youtu.be/ksGerDJYcc8?si=8rnI-q2gDxFCUURB&t=10"
+                                                }
+                                },
+                                {
+                                                "id": 177,
+                                                "technik": "Tekubi-osae (Yonkyo)",
+                                                "variation": "IRIMI",
+                                                "angriffJap": "Katate Tori - Gyakuhanme",
+                                                "angriffDe": "Griff eines Handgelenks - spiegelgleich",
+                                                "farbe": "Braun (1. Kyu)",
+                                                "videos": {
+                                                                "The Art of Aikido": "https://youtu.be/GNb8Z2GParo?si=C92t2fYabh6ZQa_Z&t=2948",
+                                                                "François Pichereau": "https://youtu.be/9B0FDMGLeiE"
+                                                }
+                                },
+                                {
+                                                "id": 178,
+                                                "technik": "Tekubi-osae (Yonkyo)",
+                                                "variation": "TENKAN",
+                                                "angriffJap": "Katate Tori - Gyakuhanme",
+                                                "angriffDe": "Griff eines Handgelenks - spiegelgleich",
+                                                "farbe": "Braun (1. Kyu)",
+                                                "videos": {
+                                                                "The Art of Aikido": "https://youtu.be/GNb8Z2GParo?si=sWyyuAlPYnMlkP6W&t=3056"
+                                                }
+                                },
+                                {
+                                                "id": 179,
+                                                "technik": "Tekubi-osae (Yonkyo)",
+                                                "variation": "",
+                                                "angriffJap": "Ryote-Tori",
+                                                "angriffDe": "Griff beider Handgelenke",
+                                                "farbe": "Braun (1. Kyu)",
+                                                "videos": {
+                                                                "François Pichereau": "https://youtu.be/SFxb6PlATMI"
+                                                }
+                                },
+                                {
+                                                "id": 180,
+                                                "technik": "Tekubi-osae (Yonkyo)",
+                                                "variation": "",
+                                                "angriffJap": "Katate-ryote-tori",
+                                                "angriffDe": "Zwei Hände fassen ein Handgelenk",
+                                                "farbe": "Braun (1. Kyu)",
+                                                "videos": {
+                                                                "François Pichereau": "https://www.youtube.com/watch?v=m3A-YWnl3A4"
+                                                }
+                                },
+                                {
+                                                "id": 181,
+                                                "technik": "Tekubi-osae (Yonkyo)",
+                                                "variation": "",
+                                                "angriffJap": "Mune-tori",
+                                                "angriffDe": "Griff zum Revers",
+                                                "farbe": "Braun (1. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 182,
+                                                "technik": "Tekubi-osae (Yonkyo)",
+                                                "variation": "",
+                                                "angriffJap": "Ushiro-ryokata-tori",
+                                                "angriffDe": "Griff beider Schultern von hinten",
+                                                "farbe": "Braun (1. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 183,
+                                                "technik": "Tekubi-osae (Yonkyo)",
+                                                "variation": "",
+                                                "angriffJap": "Ushiro-ryokata-tori",
+                                                "angriffDe": "Griff beider Schultern von hinten",
+                                                "farbe": "Braun (1. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 184,
+                                                "technik": "Tekubi-osae (Yonkyo)",
+                                                "variation": "",
+                                                "angriffJap": "Ushiro-ryote-tori",
+                                                "angriffDe": "Griff beider Handgelenke von hinten",
+                                                "farbe": "Braun (1. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 185,
+                                                "technik": "Tekubi-osae (Yonkyo)",
+                                                "variation": "",
+                                                "angriffJap": "Ushiro-eri-tori",
+                                                "angriffDe": "Griff von hinten in den Kragen",
+                                                "farbe": "Braun (1. Kyu)",
+                                                "videos": {}
+                                },
+                                {
+                                                "id": 186,
+                                                "technik": "Tekubi-osae (Yonkyo)",
+                                                "variation": "IRIMI",
+                                                "angriffJap": "Yokomen-Uchi",
+                                                "angriffDe": "Schräger Schlag zum Hals",
+                                                "farbe": "Braun (1. Kyu)",
+                                                "videos": {
+                                                                "Ruben Karl (Aikikai)": "https://youtu.be/u8WD-0W-pP4?si=8wj95pJHaNwXykif&t=1578",
+                                                                "The Art of Aikido": "https://youtu.be/Ll2MLdD3UiA?si=VBM2G9MVG9X0sdoQ&t=2719",
+                                                                "Howcast": "https://youtu.be/ksGerDJYcc8?si=3MmyAKjRS0EaX-QD&t=99",
+                                                                "François Pichereau": "https://youtu.be/0Y1tMGTY-Vc"
+                                                }
+                                },
+                                {
+                                                "id": 187,
+                                                "technik": "Tekubi-osae (Yonkyo)",
+                                                "variation": "TENKAN",
+                                                "angriffJap": "Yokomen-Uchi",
+                                                "angriffDe": "Schräger Schlag zum Hals",
+                                                "farbe": "Braun (1. Kyu)",
+                                                "videos": {
+                                                                "Ruben Karl (Aikikai)": "https://youtu.be/u8WD-0W-pP4?si=t41Y9_h1vlm0j4Ci&t=1607"
+                                                }
+                                },
+                                {
+                                                "id": 188,
+                                                "technik": "Tekubi-osae (Yonkyo)",
+                                                "variation": "IRIMI",
+                                                "angriffJap": "Shomen-uchi",
+                                                "angriffDe": "Gerader Schlag zum Kopf",
+                                                "farbe": "Braun (1. Kyu)",
+                                                "videos": {
+                                                                "The Art of Aikido": "https://youtu.be/cB3kMQZmrpo?si=8lAfPXZ_HINoQ3tV&t=1007",
+                                                                "Howcast": "https://youtu.be/ksGerDJYcc8?si=eUwevrLyltYSvDxh&t=90",
+                                                                "François Pichereau": "https://youtu.be/hh45k7dKPtw"
+                                                }
+                                },
+                                {
+                                                "id": 189,
+                                                "technik": "Tekubi-osae (Yonkyo)",
+                                                "variation": "IRIMI",
+                                                "angriffJap": "Shomen-tsuki",
+                                                "angriffDe": "Gerader Fauststoß",
+                                                "farbe": "Braun (1. Kyu)",
+                                                "videos": {
+                                                                "Ruben Karl (Aikikai)": "https://youtu.be/u8WD-0W-pP4?si=7-q-90n30pQDxk44&t=1937",
+                                                                "François Pichereau": "https://youtu.be/RERG4qHP5x8"
+                                                }
+                                },
+                                {
+                                                "id": 190,
+                                                "technik": "Tekubi-osae (Yonkyo)",
+                                                "variation": "TENKAN",
+                                                "angriffJap": "Shomen-tsuki",
+                                                "angriffDe": "Gerader Fauststoß",
+                                                "farbe": "Braun (1. Kyu)",
+                                                "videos": {
+                                                                "Ruben Karl (Aikikai)": "https://youtu.be/u8WD-0W-pP4?si=fvMrjusPlLfIbQgs&t=1971"
+                                                }
+                                },
+                                {
+                                                "id": 191,
+                                                "technik": "Ude-nobashi (Gokyu)",
+                                                "variation": "IRIMI",
+                                                "angriffJap": "Yokomen-Uchi",
+                                                "angriffDe": "Schräger Schlag zum Hals",
+                                                "farbe": "Braun (1. Kyu)",
+                                                "videos": {
+                                                                "Ruben Karl (Aikikai)": "https://youtu.be/u8WD-0W-pP4?si=E69fZ1t0LwT1_8kQ&t=1636",
+                                                                "The Art of Aikido": "https://youtu.be/GNb8Z2GParo?si=AYmRv2IO0x7TvIja&t=3253"
+                                                }
+                                }
+                ],
+                "attacks": [
+                                {
+                                                "id": 1,
+                                                "angriffJap": "Katate Tori - Aihanme",
+                                                "angriffDe": "Griff eines Handgelenks -schräg",
+                                                "farbe": "Gelb (5. Kyu)"
+                                },
+                                {
+                                                "id": 2,
+                                                "angriffJap": "Katate Tori - Gyakuhanme",
+                                                "angriffDe": "Griff eines Handgelenks - spiegelgleich",
+                                                "farbe": "Gelb (5. Kyu)"
+                                },
+                                {
+                                                "id": 3,
+                                                "angriffJap": "Ryote-Tori",
+                                                "angriffDe": "Griff beider Handgelenke",
+                                                "farbe": "Gelb (5. Kyu)"
+                                },
+                                {
+                                                "id": 4,
+                                                "angriffJap": "Katate-ryote-tori",
+                                                "angriffDe": "Zwei Hände fassen ein Handgelenk",
+                                                "farbe": "Gelb (5. Kyu)"
+                                },
+                                {
+                                                "id": 5,
+                                                "angriffJap": "Mune-tori",
+                                                "angriffDe": "Griff zum Revers",
+                                                "farbe": "Gelb (5. Kyu)"
+                                },
+                                {
+                                                "id": 6,
+                                                "angriffJap": "Ushiro-ryote-tori",
+                                                "angriffDe": "Griff beider Handgelenke von hinten",
+                                                "farbe": "Orange (4. Kyu)"
+                                },
+                                {
+                                                "id": 7,
+                                                "angriffJap": "Yokomen-Uchi",
+                                                "angriffDe": "Schräger Schlag zum Hals",
+                                                "farbe": "Orange (4. Kyu)"
+                                },
+                                {
+                                                "id": 8,
+                                                "angriffJap": "Ushiro-ryokata-tori",
+                                                "angriffDe": "Griff beider Schultern von hinten",
+                                                "farbe": "Orange (4. Kyu)"
+                                },
+                                {
+                                                "id": 9,
+                                                "angriffJap": "Ushiro-eri-tori",
+                                                "angriffDe": "Griff von hinten in den Kragen",
+                                                "farbe": "Orange (4. Kyu)"
+                                },
+                                {
+                                                "id": 10,
+                                                "angriffJap": "Ushiro-katate-tori-kubi-shime",
+                                                "angriffDe": "Griff eines Handgelenks und würgen von hinten",
+                                                "farbe": "Orange (4. Kyu)"
+                                },
+                                {
+                                                "id": 11,
+                                                "angriffJap": "Shomen-uchi",
+                                                "angriffDe": "Gerader Schlag zum Kopf",
+                                                "farbe": "Orange (4. Kyu)"
+                                },
+                                {
+                                                "id": 12,
+                                                "angriffJap": "Shomen-tsuki",
+                                                "angriffDe": "Gerader Fauststoß",
+                                                "farbe": "Orange (4. Kyu)"
+                                },
+                                {
+                                                "id": 13,
+                                                "angriffJap": "Yoko-kubi-shime",
+                                                "angriffDe": "Würgen von der Seite",
+                                                "farbe": "Blau (2. Kyu)"
+                                },
+                                {
+                                                "id": 14,
+                                                "angriffJap": "Ushiro-kakae-tori",
+                                                "angriffDe": "Umklammerung von hinten",
+                                                "farbe": "Blau (2. Kyu)"
+                                },
+                                {
+                                                "id": 15,
+                                                "angriffJap": "Ushiro-kubi-shime",
+                                                "angriffDe": "Würgen von hinten",
+                                                "farbe": "Blau (2. Kyu)"
+                                }
+                ]
+};
+            techniques = data.techniques;
+            attacks = data.attacks;
+            saveToStorage();
+        }
+
+                // Tab switching
+        function switchTab(tab) {
+            currentTab = tab;
+            
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            document.querySelectorAll('.screen').forEach(screen => screen.classList.remove('active'));
+            document.getElementById(`screen-${tab}`).classList.add('active');
+            
+            if (tab !== 'admin') {
+                renderCurrentScreen();
+            }
+        }
+
+        // Filter Buttons erstellen
+        function createFilterButtons() {
+            const colors = ['Gelb (5. Kyu)', 'Orange (4. Kyu)', 'Grün (3. Kyu)', 'Blau (2. Kyu)', 'Braun (1. Kyu)'];
+            
+            ['techniken', 'angriffe'].forEach(type => {
+                const container = document.getElementById(`filter-${type}`);
+                let html = '<button class="filter-btn alle active" onclick="setFilter(\'' + type + '\', \'alle\')">Alle</button>';
+                
+                colors.forEach(color => {
+                    const colorClass = colorMap[color];
+                    const label = color.split(' ')[0];
+                    html += `<button class="filter-btn ${colorClass}" onclick="setFilter('${type}', '${color}')">${label}</button>`;
+                });
+                
+                container.innerHTML = html;
+            });
+        }
+
+        // Filter setzen
+        function setFilter(type, filter) {
+            const key = type === 'techniken' ? 'tech' : 'ang';
+            currentFilter[key] = filter;
+            currentCardIndex[key] = 0;
+            
+            document.querySelectorAll(`#filter-${type} .filter-btn`).forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            renderCurrentScreen();
+        }
+
+        // Wiederholung Toggle
+        function toggleWiederholung(type) {
+            showDueOnly[type] = !showDueOnly[type];
+            const btn = document.getElementById(`btn-wiederholung-${type}`);
+            btn.classList.toggle('active', showDueOnly[type]);
+            currentCardIndex[type] = 0;
+            renderCurrentScreen();
+        }
+
+        // Screen rendern
+        function renderCurrentScreen() {
+            if (currentTab === 'techniken') {
+                renderTechnikenScreen();
+            } else if (currentTab === 'angriffe') {
+                renderAngriffeScreen();
+            }
+        }
+
+        // Techniken Screen
+        function renderTechnikenScreen() {
+            if (examMode) {
+                renderExamCard();
+                return;
+            }
+            
+            let cards = techniques;
+            
+            // Filter nach Farbe
+            if (currentFilter.tech !== 'alle') {
+                cards = cards.filter(t => t.farbe === currentFilter.tech);
+            }
+            
+            // Filter nach fälligen Wiederholungen
+            if (showDueOnly.tech) {
+                const now = Date.now();
+                cards = cards.filter(t => {
+                    const sr = spacedRepData.tech[t.id];
+                    return !sr || sr.nextReview <= now;
+                });
+            }
+            
+            // Stats
+            const stats = document.getElementById('stats-techniken');
+            stats.innerHTML = `${cards.length} Karten verfügbar`;
+            
+            // Flashcard
+            const container = document.getElementById('flashcard-techniken');
+            
+            if (cards.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📚</div>
+                        <div>Keine Karten verfügbar</div>
+                    </div>
+                `;
+                return;
+            }
+            
+            const card = cards[currentCardIndex.tech % cards.length];
+            const colorClass = colorMap[card.farbe];
+            const isFlipped = cardFlipped.tech;
+            
+            container.innerHTML = `
+                <div class="flashcard ${isFlipped ? 'flipped' : ''}" onclick="flipCard('tech')">
+                    <div class="flashcard-indicator ${colorClass}"></div>
+                    <div class="flashcard-front">
+                        <div class="flashcard-content">
+                            <div class="flashcard-title">${card.technik}${card.variation ? ' - ' + card.variation : ''}</div>
+                            <div class="flashcard-subtitle">${card.angriffJap}</div>
+                            <div class="flashcard-hint">Tippen zum Aufdecken</div>
+                        </div>
+                        ${notes['tech-' + card.id] ? '<div class="note-indicator">📝</div>' : ''}
+                    </div>
+                    <div class="flashcard-back">
+                        <div class="flashcard-content">
+                            ${card.videos && Object.keys(card.videos).length > 0 ? `
+                                <div class="video-list">
+                                    ${Object.entries(card.videos).map(([source, url]) => `
+                                        <div class="video-item">
+                                            <div class="video-label">${source}</div>
+                                            <a href="${url}" target="_blank" class="video-btn" onclick="event.stopPropagation()">▶ Ansehen</a>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            ` : '<div class="flashcard-hint" style="color: var(--text-secondary);">Keine Videos verfügbar</div>'}
+                            <div class="note-section">
+                                <button class="note-btn ${notes['tech-' + card.id] ? 'has-note' : ''}" onclick="event.stopPropagation(); toggleNoteEditor('tech', ${card.id})">
+                                    ${notes['tech-' + card.id] ? '📝 ' + notes['tech-' + card.id] : '+ Notiz hinzufügen'}
+                                </button>
+                                <div class="note-editor" id="note-editor-tech-${card.id}">
+                                    <textarea class="note-textarea" id="note-textarea-tech-${card.id}" placeholder="Notiz eingeben...">${notes['tech-' + card.id] || ''}</textarea>
+                                    <div class="note-actions">
+                                        <button class="note-save-btn" onclick="event.stopPropagation(); saveNote('tech', ${card.id})">💾 Speichern</button>
+                                        <button class="note-delete-btn" onclick="event.stopPropagation(); deleteNote('tech', ${card.id})">🗑 Löschen</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                ${isFlipped ? `
+                    <div class="rating-buttons">
+                        <button class="rating-btn success" onclick="rateCard('tech', 'easy')">✓ Kann ich</button>
+                        <button class="rating-btn warning" onclick="rateCard('tech', 'medium')">~ Geht so</button>
+                        <button class="rating-btn error" onclick="rateCard('tech', 'hard')">✗ Schwer</button>
+                    </div>
+                ` : ''}
+            `;
+        }
+
+        // Angriffe Screen
+        function renderAngriffeScreen() {
+            let cards = attacks;
+            
+            if (currentFilter.ang !== 'alle') {
+                cards = cards.filter(a => a.farbe === currentFilter.ang);
+            }
+            
+            if (showDueOnly.ang) {
+                const now = Date.now();
+                cards = cards.filter(a => {
+                    const sr = spacedRepData.ang[a.id];
+                    return !sr || sr.nextReview <= now;
+                });
+            }
+            
+            const stats = document.getElementById('stats-angriffe');
+            stats.innerHTML = `${cards.length} Karten verfügbar`;
+            
+            const container = document.getElementById('flashcard-angriffe');
+            
+            if (cards.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📚</div>
+                        <div>Keine Karten verfügbar</div>
+                    </div>
+                `;
+                return;
+            }
+            
+            const card = cards[currentCardIndex.ang % cards.length];
+            const colorClass = colorMap[card.farbe];
+            const isFlipped = cardFlipped.ang;
+            
+            container.innerHTML = `
+                <div class="flashcard ${isFlipped ? 'flipped' : ''}" onclick="flipCard('ang')">
+                    <div class="flashcard-indicator ${colorClass}"></div>
+                    <div class="flashcard-front">
+                        <div class="flashcard-content">
+                            <div class="flashcard-title">${card.angriffJap}</div>
+                            <div class="flashcard-hint">Tippen zum Aufdecken</div>
+                        </div>
+                        ${notes['ang-' + card.id] ? '<div class="note-indicator">📝</div>' : ''}
+                    </div>
+                    <div class="flashcard-back">
+                        <div class="flashcard-content">
+                            <div class="flashcard-subtitle">Deutsche Beschreibung</div>
+                            <div class="flashcard-title" style="font-size: 1.2em;">${card.angriffDe}</div>
+                            <div class="note-section">
+                                <button class="note-btn ${notes['ang-' + card.id] ? 'has-note' : ''}" onclick="event.stopPropagation(); toggleNoteEditor('ang', ${card.id})">
+                                    ${notes['ang-' + card.id] ? '📝 ' + notes['ang-' + card.id] : '+ Notiz hinzufügen'}
+                                </button>
+                                <div class="note-editor" id="note-editor-ang-${card.id}">
+                                    <textarea class="note-textarea" id="note-textarea-ang-${card.id}" placeholder="Notiz eingeben...">${notes['ang-' + card.id] || ''}</textarea>
+                                    <div class="note-actions">
+                                        <button class="note-save-btn" onclick="event.stopPropagation(); saveNote('ang', ${card.id})">💾 Speichern</button>
+                                        <button class="note-delete-btn" onclick="event.stopPropagation(); deleteNote('ang', ${card.id})">🗑 Löschen</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                ${isFlipped ? `
+                    <div class="rating-buttons">
+                        <button class="rating-btn success" onclick="rateCard('ang', 'easy')">✓ Kann ich</button>
+                        <button class="rating-btn error" onclick="rateCard('ang', 'hard')">✗ Kann ich nicht</button>
+                    </div>
+                ` : ''}
+            `;
+        }
+
+        // Notizen
+        function toggleNoteEditor(type, id) {
+            const editor = document.getElementById(`note-editor-${type}-${id}`);
+            editor.classList.toggle('open');
+            if (editor.classList.contains('open')) {
+                document.getElementById(`note-textarea-${type}-${id}`).focus();
+            }
+        }
+
+        function saveNote(type, id) {
+            const key = `${type}-${id}`;
+            const text = document.getElementById(`note-textarea-${type}-${id}`).value.trim();
+            if (text) {
+                notes[key] = text;
+            } else {
+                delete notes[key];
+            }
+            saveToStorage();
+            renderCurrentScreen();
+        }
+
+        function deleteNote(type, id) {
+            delete notes[`${type}-${id}`];
+            saveToStorage();
+            renderCurrentScreen();
+        }
+
+        // Karte umdrehen
+        function flipCard(type) {
+            cardFlipped[type] = !cardFlipped[type];
+            renderCurrentScreen();
+        }
+
+        // Karte bewerten
+        function rateCard(type, difficulty) {
+            event.stopPropagation();
+            
+            const cards = type === 'tech' ? 
+                (currentFilter.tech === 'alle' ? techniques : techniques.filter(t => t.farbe === currentFilter.tech)) :
+                (currentFilter.ang === 'alle' ? attacks : attacks.filter(a => a.farbe === currentFilter.ang));
+            
+            const card = cards[currentCardIndex[type] % cards.length];
+            
+            // Spaced Repetition berechnen
+            const now = Date.now();
+            const intervals = {
+                easy: 7 * 24 * 60 * 60 * 1000,   // 7 Tage
+                medium: 3 * 24 * 60 * 60 * 1000,  // 3 Tage
+                hard: 1 * 24 * 60 * 60 * 1000     // 1 Tag
+            };
+            
+            spacedRepData[type][card.id] = {
+                lastReview: now,
+                nextReview: now + intervals[difficulty],
+                ease: difficulty
+            };
+            
+            saveToStorage();
+            
+            // Nächste Karte
+            currentCardIndex[type]++;
+            cardFlipped[type] = false;
+            renderCurrentScreen();
+        }
+
+        // Prüfung starten
+        function startExam() {
+            if (currentFilter.tech === 'alle') {
+                if (!confirm('Prüfung für alle Gürtelfarben? Besser eine Farbe auswählen.')) {
+                    return;
+                }
+            }
+            
+            examMode = true;
+            examResults = [];
+            currentCardIndex.tech = 0;
+            cardFlipped.tech = false;
+            
+            // Karten für Prüfung vorbereiten (shuffle)
+            let cards = techniques;
+            if (currentFilter.tech !== 'alle') {
+                cards = cards.filter(t => t.farbe === currentFilter.tech);
+            }
+            
+            if (cards.length === 0) {
+                alert('Keine Karten für Prüfung verfügbar.');
+                examMode = false;
+                return;
+            }
+            
+            // Shuffle
+            examCards = shuffleArray(cards);
+            
+            document.getElementById('btn-wiederholung-tech').style.display = 'none';
+            document.querySelector('#screen-techniken .control-bar button:nth-child(2)').textContent = '✓ Prüfung beenden';
+            
+            renderExamCard();
+        }
+
+        // Array shufflen
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        // Prüfungskarte rendern
+        function renderExamCard() {
+            if (currentCardIndex.tech >= examCards.length) {
+                finishExam();
+                return;
+            }
+            
+            const card = examCards[currentCardIndex.tech];
+            const colorClass = colorMap[card.farbe];
+            const isFlipped = cardFlipped.tech;
+            
+            const stats = document.getElementById('stats-techniken');
+            stats.innerHTML = `Prüfung: ${currentCardIndex.tech + 1} von ${examCards.length}`;
+            
+            const container = document.getElementById('flashcard-techniken');
+            container.innerHTML = `
+                <div class="flashcard ${isFlipped ? 'flipped' : ''}" onclick="flipCard('tech')">
+                    <div class="flashcard-indicator ${colorClass}"></div>
+                    <div class="flashcard-front">
+                        <div class="flashcard-content">
+                            <div class="flashcard-title">${card.technik}${card.variation ? ' - ' + card.variation : ''}</div>
+                            <div class="flashcard-subtitle">${card.angriffJap}</div>
+                            <div class="flashcard-hint">Tippen zum Aufdecken</div>
+                        </div>
+                    </div>
+                    <div class="flashcard-back">
+                        <div class="flashcard-content">
+                            <div class="flashcard-subtitle">Deutsche Beschreibung</div>
+                            <div class="flashcard-title" style="font-size: 1.2em;">${card.angriffDe}</div>
+                        </div>
+                    </div>
+                </div>
+                ${isFlipped ? `
+                    <div class="rating-buttons">
+                        <button class="rating-btn success" onclick="rateExamCard('correct')">✓ Gewusst</button>
+                        <button class="rating-btn error" onclick="rateExamCard('wrong')">✗ Nicht gewusst</button>
+                    </div>
+                ` : ''}
+            `;
+        }
+
+        // Prüfungskarte bewerten
+        function rateExamCard(result) {
+            event.stopPropagation();
+            
+            const card = examCards[currentCardIndex.tech];
+            examResults.push({
+                card: card,
+                result: result
+            });
+            
+            currentCardIndex.tech++;
+            cardFlipped.tech = false;
+            renderExamCard();
+        }
+
+        // Prüfung beenden
+        function finishExam() {
+            const correct = examResults.filter(r => r.result === 'correct').length;
+            const total = examResults.length;
+            const percentage = Math.round((correct / total) * 100);
+            
+            const container = document.getElementById('flashcard-techniken');
+            
+            let scoreClass = 'error';
+            let scoreText = 'Nicht bestanden';
+            if (percentage >= 80) {
+                scoreClass = 'success';
+                scoreText = 'Ausgezeichnet!';
+            } else if (percentage >= 60) {
+                scoreClass = 'warning';
+                scoreText = 'Bestanden';
+            }
+            
+            container.innerHTML = `
+                <div style="background: var(--bg-primary); padding: 40px; border-radius: 12px; text-align: center;">
+                    <div style="font-size: 3em; font-weight: bold; color: var(--${scoreClass}-color); margin-bottom: 20px;">
+                        ${percentage}%
+                    </div>
+                    <div style="font-size: 1.5em; font-weight: 600; margin-bottom: 30px;">
+                        ${scoreText}
+                    </div>
+                    <div style="padding: 20px; background: var(--bg-secondary); border-radius: 8px; margin-bottom: 30px;">
+                        <div style="margin-bottom: 10px;"><strong>${correct} von ${total}</strong> Techniken gewusst</div>
+                        <div style="font-size: 0.9em; color: var(--text-secondary);">
+                            ✓ Richtig: ${correct}<br>
+                            ✗ Falsch: ${total - correct}
+                        </div>
+                    </div>
+                    <button class="rating-btn success" onclick="exitExam()" style="width: 100%;">
+                        Zurück zum Training
+                    </button>
+                </div>
+            `;
+            
+            const stats = document.getElementById('stats-techniken');
+            stats.innerHTML = `Prüfung abgeschlossen: ${percentage}%`;
+        }
+
+        // Prüfung verlassen
+        function exitExam() {
+            examMode = false;
+            examResults = [];
+            examCards = [];
+            currentCardIndex.tech = 0;
+            cardFlipped.tech = false;
+            
+            document.getElementById('btn-wiederholung-tech').style.display = '';
+            document.querySelector('#screen-techniken .control-bar button:nth-child(2)').textContent = '📝 Prüfung';
+            
+            renderTechnikenScreen();
+        }
+
+        let examCards = [];
+
+        // Menu
+        function toggleMenu() {
+            document.getElementById('menu-overlay').classList.toggle('active');
+        }
+
+        function closeMenuOnOverlay(event) {
+            if (event.target === event.currentTarget) {
+                toggleMenu();
+            }
+        }
+
+        // Theme
+        function toggleTheme() {
+            const html = document.documentElement;
+            const isDark = html.getAttribute('data-theme') === 'dark';
+            
+            if (isDark) {
+                html.removeAttribute('data-theme');
+                localStorage.setItem('aikidoTheme', 'light');
+                document.getElementById('theme-toggle').classList.remove('active');
+            } else {
+                html.setAttribute('data-theme', 'dark');
+                localStorage.setItem('aikidoTheme', 'dark');
+                document.getElementById('theme-toggle').classList.add('active');
+            }
+        }
+
+        // Admin
+        function adminLogin() {
+            const password = document.getElementById('admin-password').value;
+            if (password === ADMIN_PASSWORD) {
+                adminLoggedIn = true;
+                document.getElementById('admin-login').style.display = 'none';
+                document.getElementById('admin-panel').style.display = 'block';
+                updateAdminStats();
+            } else {
+                alert('Falsches Passwort!');
+            }
+        }
+
+        function adminLogout() {
+            adminLoggedIn = false;
+            document.getElementById('admin-login').style.display = 'block';
+            document.getElementById('admin-panel').style.display = 'none';
+            document.getElementById('admin-password').value = '';
+        }
+
+        function updateAdminStats() {
+            const stats = document.getElementById('admin-stats');
+            const techsWithVideos = techniques.filter(t => t.videos && Object.keys(t.videos).length > 0).length;
+            const totalVideos = techniques.reduce((sum, t) => sum + (t.videos ? Object.keys(t.videos).length : 0), 0);
+            stats.innerHTML = `
+                <div style="padding: 10px; background: var(--bg-secondary); border-radius: 6px; margin-bottom: 8px;">
+                    Techniken: ${techniques.length}
+                </div>
+                <div style="padding: 10px; background: var(--bg-secondary); border-radius: 6px; margin-bottom: 8px;">
+                    Angriffe: ${attacks.length}
+                </div>
+                <div style="padding: 10px; background: var(--bg-secondary); border-radius: 6px; margin-bottom: 8px;">
+                    Mit Videos: ${techsWithVideos} von ${techniques.length}
+                </div>
+                <div style="padding: 10px; background: var(--bg-secondary); border-radius: 6px;">
+                    Video-Links total: ${totalVideos}
+                </div>
+            `;
+        }
+
+        // File Upload
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const fileName = file.name.toLowerCase();
+            
+            if (fileName.endsWith('.csv')) {
+                parseCSVFile(file);
+            } else if (fileName.endsWith('.xlsx') || fileName.endsWith('.xls')) {
+                alert('Excel-Import: Bitte speichere die Datei als CSV (Tab-getrennt) und lade sie erneut hoch.');
+            } else {
+                alert('Nur CSV-Dateien werden unterstützt.');
+            }
+        }
+
+        // CSV parsen
+        function parseCSVFile(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const text = e.target.result;
+                const lines = text.split('\n');
+                
+                if (lines.length < 2) {
+                    alert('CSV-Datei ist leer oder ungültig.');
+                    return;
+                }
+                
+                // Header-Zeile
+                const headers = lines[0].split('\t').map(h => h.trim());
+                
+                // Indizes finden
+                const colIndex = {
+                    technik: headers.findIndex(h => h.toLowerCase().includes('technik')),
+                    variation: headers.findIndex(h => h.toLowerCase().includes('variation')),
+                    angriffJap: headers.findIndex(h => h.toLowerCase().includes('japanisch')),
+                    angriffDe: headers.findIndex(h => h.toLowerCase().includes('deutsch')),
+                    farbe: headers.findIndex(h => h.toLowerCase().includes('farb') || h.toLowerCase().includes('prüf'))
+                };
+                
+                // Techniken extrahieren
+                techniques = [];
+                const attacksMap = {};
+                
+                for (let i = 1; i < lines.length; i++) {
+                    if (!lines[i].trim()) continue;
+                    
+                    const values = lines[i].split('\t');
+                    if (values.length < 5) continue;
+                    
+                    // Videos sammeln (Spaltenname als Quelle-Label)
+                    const videos = {};
+                    for (let j = 5; j < values.length; j++) {
+                        const val = values[j].trim();
+                        if (val.startsWith('http')) {
+                            const label = headers[j] ? headers[j].trim() : `Video ${j - 4}`;
+                            videos[label] = val;
+                        }
+                    }
+                    
+                    const tech = {
+                        id: i,
+                        technik: values[colIndex.technik]?.trim() || '',
+                        variation: values[colIndex.variation]?.trim() || '',
+                        angriffJap: values[colIndex.angriffJap]?.trim() || '',
+                        angriffDe: values[colIndex.angriffDe]?.trim() || '',
+                        farbe: values[colIndex.farbe]?.trim() || '',
+                        videos: videos
+                    };
+                    
+                    techniques.push(tech);
+                    
+                    // Angriff speichern
+                    if (tech.angriffJap && !attacksMap[tech.angriffJap]) {
+                        attacksMap[tech.angriffJap] = {
+                            id: Object.keys(attacksMap).length + 1,
+                            angriffJap: tech.angriffJap,
+                            angriffDe: tech.angriffDe,
+                            farbe: tech.farbe
+                        };
+                    }
+                }
+                
+                attacks = Object.values(attacksMap);
+                
+                saveToStorage();
+                updateAdminStats();
+                
+                alert(`✓ Import erfolgreich!\n${techniques.length} Techniken\n${attacks.length} Angriffe`);
+            };
+            
+            reader.onerror = function() {
+                alert('Fehler beim Lesen der Datei.');
+            };
+            
+            reader.readAsText(file, 'UTF-8');
+        }
+
+        // Drag & Drop
+        const uploadArea = document.getElementById('upload-area');
+        if (uploadArea) {
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, preventDefaults, false);
+            });
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, () => {
+                    uploadArea.classList.add('dragover');
+                }, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, () => {
+                    uploadArea.classList.remove('dragover');
+                }, false);
+            });
+
+            uploadArea.addEventListener('drop', (e) => {
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    document.getElementById('file-input').files = files;
+                    handleFileUpload({ target: { files } });
+                }
+            }, false);
+        }
+
+        // Start
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+    <!-- Service Worker registrieren -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').then(() => {
+                console.log('Service Worker registered');
+            }).catch(err => {
+                console.log('Service Worker failed:', err);
+            });
+        }
+    </script>
+</body>
+</html>
